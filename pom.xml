@@ -23,10 +23,10 @@
 	</developers>
   
 	<scm>
-		<connection>scm:git:ssh://github.com/jenkinsci/graphite-plugin.git</connection>
-		<developerConnection>scm:git:ssh://git@github.com/jenkinsci/graphite-plugin.git</developerConnection>
-		<url>https://github.com/jenkinsci/graphite-plugin</url>
-	</scm>
+	    <connection>scm:git:ssh://github.com/jenkinsci/graphite-plugin.git</connection>
+	    <developerConnection>scm:git:ssh://git@github.com/jenkinsci/graphite-plugin.git</developerConnection>
+	    <url>https://github.com/jenkinsci/graphite-plugin</url>
+  	</scm>
   
 	<!-- get every artifact through repo.jenkins-ci.org, which proxies all the 
 		artifacts that we need -->
@@ -51,11 +51,17 @@
 		</plugins>
 	</build>
 	<repositories>
-		<repository>
-			<id>repo.jenkins-ci.org</id>
-			<url>http://repo.jenkins-ci.org/public/</url>
-		</repository>
-	</repositories>
+          <repository>
+            <id>repo.jenkins-ci.org</id>
+            <url>http://repo.jenkins-ci.org/public/</url>
+          </repository>
+   	</repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>repo.jenkins-ci.org</id>
+            <url>http://repo.jenkins-ci.org/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
 
 	<dependencies>
 		<dependency>
@@ -63,23 +69,14 @@
 			<artifactId>cobertura</artifactId>
 			<version>2.0.3</version>
 		</dependency>
-
-
 	</dependencies>
 
 	<distributionManagement>
-		<repository>
-		  <id>maven.jenkins-ci.org</id>
-		  <url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
-		</repository>
-	</distributionManagement>
-
-	<pluginRepositories>
-		<pluginRepository>
-			<id>repo.jenkins-ci.org</id>
-			<url>http://repo.jenkins-ci.org/public/</url>
-		</pluginRepository>
-	</pluginRepositories>
+	    <repository>
+	      <id>maven.jenkins-ci.org</id>
+	      <url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
+	    </repository>
+  	</distributionManagement>
 
 	<properties>
 		<!-- explicitly specifying the latest version here because one we get from 
