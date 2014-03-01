@@ -42,6 +42,11 @@ public class GraphitePublisher extends Notifier {
      *
      */
 	private String selectedMetric;
+	
+	/**
+	 * 
+	 */
+	private String protocol;
 
 	/**
      *
@@ -57,10 +62,12 @@ public class GraphitePublisher extends Notifier {
 	/**
      *
      */
-	public GraphitePublisher(String ip, String metric) {
+	public GraphitePublisher(String ip, String metric, String protocol) {
 		this.selectedIp = ip;
 		this.selectedMetric = metric;
-
+		this.protocol = protocol;
+		System.out.println("IP: " + ip);
+		System.out.println("Protocol: " + protocol);
 	}
 
 	/**
@@ -178,9 +185,10 @@ public class GraphitePublisher extends Notifier {
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
 			throws InterruptedException, IOException {
 
-		if (build.getResult() == Result.FAILURE || build.getResult() == Result.ABORTED) {
-			return true;
-		}
+		// EDITED: We do not want to exit if build fails
+		//if (build.getResult() == Result.FAILURE || build.getResult() == Result.ABORTED) {
+		//	return true;
+		//}
 		if (getServer() == null) {
 			return false;
 		}
