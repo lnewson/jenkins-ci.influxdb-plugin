@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.graphiteIntegrator;
 
 import org.jenkinsci.plugins.graphiteIntegrator.loggers.GraphiteLogger;
+
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -10,15 +11,20 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.jenkinsci.plugins.graphiteIntegrator.metrics.AbstractMetric;
 import org.jenkinsci.plugins.graphiteIntegrator.metrics.BuildDurationMetric;
+import org.jenkinsci.plugins.graphiteIntegrator.metrics.BuildFailedMetric;
+import org.jenkinsci.plugins.graphiteIntegrator.metrics.BuildSuccessfulMetric;
 import org.jenkinsci.plugins.graphiteIntegrator.metrics.CoberturaCodeCoverageMetric;
 import org.jenkinsci.plugins.graphiteIntegrator.metrics.FailTestsMetric;
 import org.jenkinsci.plugins.graphiteIntegrator.metrics.SkipTestsMetric;
 import org.jenkinsci.plugins.graphiteIntegrator.metrics.TotalTestsMetric;
+
 import utils.MetricsEnum;
 
 /**
@@ -162,7 +168,8 @@ public class GraphitePublisher extends Notifier {
 	 */
 	@Override
 	public BuildStepMonitor getRequiredMonitorService() {
-		return BuildStepMonitor.BUILD;
+		//return BuildStepMonitor.BUILD;
+		return BuildStepMonitor.NONE;
 	}
 
 	/*
@@ -186,9 +193,10 @@ public class GraphitePublisher extends Notifier {
 			throws InterruptedException, IOException {
 
 		// EDITED: We do not want to exit if build fails
-		//if (build.getResult() == Result.FAILURE || build.getResult() == Result.ABORTED) {
-		//	return true;
-		//}
+		if (build.getResult() == Result.ABORTED) {
+			return true;
+		}
+		
 		if (getServer() == null) {
 			return false;
 		}
@@ -204,6 +212,14 @@ public class GraphitePublisher extends Notifier {
 		for (Metric metric : metrics) {
 			if (metric.name.equals(MetricsEnum.BUILD_DURATION.name())) {
 				metricSender = new BuildDurationMetric(build, listener.getLogger(), graphiteLogger);
+				metricSender.sendMetric(getServer(), metric);
+			}
+			if(metric.name.equals(MetricsEnum.BUILD_FAILED.name())){
+				metricSender = new BuildFailedMetric(build, listener.getLogger(), graphiteLogger);
+				metricSender.sendMetric(getServer(), metric);
+			}
+			if(metric.name.equals(MetricsEnum.BUILD_SUCCESSFUL.name())){
+				metricSender = new BuildSuccessfulMetric(build, listener.getLogger(), graphiteLogger);
 				metricSender.sendMetric(getServer(), metric);
 			}
 			if (isCoberturaMetric(metric)) {

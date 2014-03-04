@@ -47,18 +47,17 @@ public class GraphiteLogger {
     	}
     }
     
-    private void logToGraphiteUDP(String graphiteHost, String graphitePort, String queue, String metric) throws UnknownHostException, IOException  {
+    private void logToGraphiteUDP(String graphiteHost, String graphitePort, String queue, String metric) throws UnknownHostException, IOException {
         //TMP to test
         long timestamp = System.currentTimeMillis()/1000;
         String data = queue + " " + metric + " " + timestamp + "\n";
         
     	int intPort = Integer.parseInt(graphitePort);
     	byte[] buffer = data.getBytes();
-    	
-    	DatagramSocket sock = new DatagramSocket(intPort);
         InetAddress IPAddress = InetAddress.getByName(graphiteHost);
     	
         try {
+        	DatagramSocket sock = new DatagramSocket(intPort);
         	DatagramPacket sendPacket = new DatagramPacket(buffer, buffer.length, IPAddress, intPort);
         	sock.send(sendPacket);
         	sock.close();
