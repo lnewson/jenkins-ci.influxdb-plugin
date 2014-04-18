@@ -92,7 +92,6 @@ public final class DescriptorImpl extends BuildStepDescriptor<Publisher> impleme
 	 */
 	@Override
 	public boolean isApplicable(Class<? extends AbstractProject> jobType) {
-		//return "hudson.maven.MavenModuleSet".equals(jobType.getName());
 		return true;
 	}
 
