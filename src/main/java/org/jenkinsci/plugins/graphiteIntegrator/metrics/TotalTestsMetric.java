@@ -4,6 +4,7 @@
 package org.jenkinsci.plugins.graphiteIntegrator.metrics;
 
 import hudson.model.AbstractBuild;
+import hudson.tasks.test.AbstractTestResultAction;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.UnknownHostException;
@@ -37,7 +38,7 @@ public class TotalTestsMetric extends AbstractMetric {
 	@Override
 	public void sendMetric(Server server, Metric... metric) throws UnknownHostException, IOException {
 
-		String metricToSend = Integer.toString(build.getTestResultAction().getTotalCount());
+		String metricToSend = Integer.toString(build.getAction(AbstractTestResultAction.class).getTotalCount());
 
 		sendMetric(server, metric[0], metricToSend);
 	}
