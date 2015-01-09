@@ -53,17 +53,17 @@ public abstract class AbstractMetric {
 			if (validator.isListening(server.getIp(), Integer.parseInt(server.getPort()))) {
 				graphiteLogger.logToGraphite(server.getIp(), server.getPort(), getCheckedBaseQueueName() + metric.getFullQueueAndName(), value.trim(), server.getProtocol());
 				logger.println("Metric: " + metric.getName() + " with value: "+ value + " correctly sent to " + server.getIp() + ":" + server.getPort()
-					+ " on " + metric.getQueueName() + "using UDP");
+					+ " on " +  getCheckedBaseQueueName() + metric.getFullQueueAndName() + "using UDP");
 			}
 		}
 		else if (server.getProtocol().equals("TCP")) {
 			if (validator.isListening(server.getIp(), Integer.parseInt(server.getPort()))) {
 				graphiteLogger.logToGraphite(server.getIp(), server.getPort(),  getCheckedBaseQueueName() + metric.getFullQueueAndName(), value.trim(), server.getProtocol());
 				logger.println("Metric: " + metric.getName() + " with value: "+ value + " correctly sent to " + server.getIp() + ":" + server.getPort()
-					+ " on " + metric.getQueueName());
+					+ " on " +  getCheckedBaseQueueName() + metric.getFullQueueAndName());
 			} else {
 				logger.println("Metric: " + metric.getName() + " with value: "+ value + " failed when sent to " + server.getIp() + ":" + server.getPort()
-					+ " on " + metric.getQueueName());
+					+ " on " +  getCheckedBaseQueueName() + metric.getFullQueueAndName());
 			}
 		}
 	}
