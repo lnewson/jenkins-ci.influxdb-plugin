@@ -27,9 +27,9 @@
 	</developers>
 
 	<scm>
-		<connection>scm:git:ssh://github.com/betgenius/graphite-plugin.git</connection>
-		<developerConnection>scm:git:ssh://git@github.com/betgenius/graphite-plugin.git</developerConnection>
-		<url>https://github.com/betgenius/graphite-plugin</url>
+		<connection>scm:git:ssh://github.com/jenkinsci/graphite-plugin.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/jenkinsci/graphite-plugin.git</developerConnection>
+		<url>https://github.com/jenkinsci/graphite-plugin</url>
 	</scm>
 
 	<!-- get every artifact through repo.jenkins-ci.org, which proxies all the 
