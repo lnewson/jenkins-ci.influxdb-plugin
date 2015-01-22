@@ -129,6 +129,26 @@ public String getBaseQueueName(){
 	}
 
 
+	public GraphiteValidator getValidator() {
+	return validator;
+}
+
+
+public void setValidator(GraphiteValidator validator) {
+	this.validator = validator;
+}
+
+
+public CopyOnWriteMap<String, Metric> getMetricsMap() {
+	return metricsMap;
+}
+
+
+public void setBaseQueueName(String baseQueueName) {
+	this.baseQueueName = baseQueueName;
+}
+
+
 	/**
 	 * @param ip
 	 * @param port

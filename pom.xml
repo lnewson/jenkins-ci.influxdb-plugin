@@ -4,8 +4,8 @@
 	<parent>
 		<groupId>org.jenkins-ci.plugins</groupId>
 		<artifactId>plugin</artifactId>
-		<version>1.532.1</version><!-- which version of Jenkins is this plugin 
-			built against? -->
+		<version>1.596</version><!-- which version of Jenkins is this plugin built 
+			against? -->
 	</parent>
 	<artifactId>graphiteIntegrator</artifactId>
 	<version>1.2-SNAPSHOT</version>
@@ -17,6 +17,12 @@
 			<id>joachim_rodrigues</id>
 			<name>joachim rodrigues</name>
 			<email>rodrigues.joachim@gmail.com</email>
+		</developer>
+
+		<developer>
+			<id>patelm5</id>
+			<name>Mike Patel</name>
+			<email>mpatelgrad@gmail.com</email>
 		</developer>
 	</developers>
 
@@ -67,6 +73,13 @@
 			<artifactId>cobertura</artifactId>
 			<version>2.0.3</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.jenkins-ci.plugins</groupId>
+			<artifactId>junit</artifactId>
+			<version>1.2-beta-4</version>
+		</dependency>
+
 	</dependencies>
 
 	<distributionManagement>
@@ -78,6 +91,6 @@
 
 	<properties>
 
-		<maven-hpi-plugin.version>1.95</maven-hpi-plugin.version>
+		<maven-hpi-plugin.version>1.112</maven-hpi-plugin.version>
 	</properties>
 </project>

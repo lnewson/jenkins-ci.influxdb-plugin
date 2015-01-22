@@ -73,8 +73,22 @@ public class GraphitePublisher extends Notifier {
         System.out.println("Protocol: " + protocol);
 
     }
+    
+    
 
-    /**
+    public String getProtocol() {
+		return protocol;
+	}
+
+	public void setProtocol(String protocol) {
+		this.protocol = protocol;
+	}
+
+	public void setMetrics(List<Metric> metrics) {
+		this.metrics = metrics;
+	}
+
+	/**
      *
      */
     public List<Metric> getMetrics() {
