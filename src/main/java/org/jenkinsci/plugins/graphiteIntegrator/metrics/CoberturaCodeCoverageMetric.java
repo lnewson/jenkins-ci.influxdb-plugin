@@ -95,7 +95,7 @@ public class CoberturaCodeCoverageMetric extends AbstractMetric {
 
 	/**
 	 * @param packageName
-	 * @return
+	 * @return package coverage
 	 */
 	private PackageCoverage getPackageCoverage(String packageName) {
 		PackageCoverage packageCoverage = packageCoverageMap.get(packageName);
@@ -108,7 +108,7 @@ public class CoberturaCodeCoverageMetric extends AbstractMetric {
 
 	/**
 	 * @param coverateRate
-	 * @return
+	 * @return coverage percentage
 	 */
 	private String percentage(double coverateRate) {
 		BigDecimal decimal = new BigDecimal(coverateRate * 100);

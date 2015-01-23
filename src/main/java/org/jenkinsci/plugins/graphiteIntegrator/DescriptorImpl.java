@@ -21,19 +21,11 @@ import java.util.Iterator;
  */
 public final class DescriptorImpl extends BuildStepDescriptor<Publisher> implements ModelObject {
 
-	/**
-	 * 
-	 */
+	
 	private final CopyOnWriteMap<String, Metric> metricsMap = new CopyOnWriteMap.Hash();
 
-	/**
-	 * 
-	 */
 	private final CopyOnWriteList<Server> servers = new CopyOnWriteList<Server>();
 
-	/**
-	 * 
-	 */
 	private GraphiteValidator validator = new GraphiteValidator();
 
 	
@@ -49,7 +41,7 @@ public final class DescriptorImpl extends BuildStepDescriptor<Publisher> impleme
 
 
 	/**
-	 * @return
+	 * @return metrics
 	 */
 	public Metric[] getMetrics() {
 		metricsMap.clear();
@@ -66,7 +58,7 @@ public final class DescriptorImpl extends BuildStepDescriptor<Publisher> impleme
 
 	
 	/**
-	 * @return
+	 * @return servers
 	 */
 	public Server[] getServers() {
 		Iterator<Server> it = servers.iterator();
@@ -152,7 +144,7 @@ public void setBaseQueueName(String baseQueueName) {
 	/**
 	 * @param ip
 	 * @param port
-	 * @return
+	 * @return form validation of connection status.
 	 */
 	public FormValidation doTestConnection(@QueryParameter("serverBinding.ip") final String ip,
 			@QueryParameter("serverBinding.port") final String port,
@@ -174,7 +166,7 @@ public void setBaseQueueName(String baseQueueName) {
 
 	/**
 	 * @param value
-	 * @return
+	 * @return  form validation of ip status.
 	 */
 	public FormValidation doCheckIp(@QueryParameter final String value) {
 		if (!validator.isIpPresent(value)) {
@@ -189,7 +181,7 @@ public void setBaseQueueName(String baseQueueName) {
 
 	/**
 	 * @param value
-	 * @return
+	 * @return  form validation of description
 	 */
 	public FormValidation doCheckDescription(@QueryParameter final String value) {
 		if (!validator.isDescriptionPresent(value)) {
@@ -204,7 +196,7 @@ public void setBaseQueueName(String baseQueueName) {
 
 	/**
 	 * @param value
-	 * @return
+	 * @return  form validation of port.
 	 */
 	public FormValidation doCheckPort(@QueryParameter final String value) {
 		if (!validator.isPortPresent(value)) {
@@ -221,7 +213,7 @@ public void setBaseQueueName(String baseQueueName) {
 	/**
 	 * 
 	 * @param value
-	 * @return
+	 * @return  form validation of base queue name
 	 */
 	public FormValidation doCheckBaseQueueName(@QueryParameter final String value) {
 	    if(!validator.isBaseQueueNamePresent(value)){

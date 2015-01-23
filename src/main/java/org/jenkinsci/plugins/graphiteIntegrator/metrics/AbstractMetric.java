@@ -38,10 +38,11 @@ public abstract class AbstractMetric {
 		this.baseQueueName = baseQueueName;
 	}
 
+	
 	/**
 	 * @param server
 	 * @param metric
-	 * @param metricToSend
+	 * @param value
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
@@ -70,7 +71,7 @@ public abstract class AbstractMetric {
 	
 	/**
 	 * Check if base queuename is null or whitespace and return empty, otherwise return the base queue name with a full stop appended
-	 * @return
+	 * @return base queue name
 	 */
 	protected String getCheckedBaseQueueName(){
 	    if(StringUtils.isBlank(baseQueueName)){

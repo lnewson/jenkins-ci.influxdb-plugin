@@ -33,20 +33,14 @@ import utils.MetricsEnum;
  */
 public class GraphitePublisher extends Notifier {
 
-    /**
-     *
-     */
+
     @Extension
     public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
-    /**
-     *
-     */
+
     private String selectedIp;
 
-    /**
-     *
-     */
+
     private String selectedMetric;
 
     /**
@@ -89,14 +83,16 @@ public class GraphitePublisher extends Notifier {
 	}
 
 	/**
-     *
-     */
+	 * 
+	 * @return metrics
+	 */
     public List<Metric> getMetrics() {
         return metrics;
     }
 
     /**
-     *
+     * 
+     * @return selectedIp
      */
     public String getSelectedIp() {
         String ipTemp = selectedIp;
@@ -110,7 +106,8 @@ public class GraphitePublisher extends Notifier {
     }
 
     /**
-     *
+     * 
+     * @return selectedMetric
      */
     public String getSelectedMetric() {
         String metricTemp = selectedMetric;
@@ -124,21 +121,24 @@ public class GraphitePublisher extends Notifier {
     }
 
     /**
-     *
+     * 
+     * @param ip
      */
     public void setSelectedIp(String ip) {
         this.selectedIp = ip;
     }
 
     /**
-     *
+     * 
+     * @param metric
      */
     public void setSelectedMetric(String metric) {
         this.selectedMetric = metric;
     }
 
     /**
-     *
+     * 
+     * @return server
      */
     public Server getServer() {
         Server[] servers = DESCRIPTOR.getServers();
@@ -268,7 +268,7 @@ public class GraphitePublisher extends Notifier {
 
     /**
      * @param coberturaMetrics
-     * @return
+     * @return isCoberturaListInitialized
      */
     private boolean isCoberturaListInitialized(List<Metric> coberturaMetrics) {
         return coberturaMetrics != null;
@@ -276,7 +276,7 @@ public class GraphitePublisher extends Notifier {
 
     /**
      * @param metric
-     * @return
+     * @return isCoberturaMetric
      */
     private boolean isCoberturaMetric(Metric metric) {
         return (// metric.name.equals(MetricsEnum.COBERTURA_PACKAGE_BRANCH_COVERAGE.name())
