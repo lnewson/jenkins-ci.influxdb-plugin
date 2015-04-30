@@ -3,52 +3,52 @@
     xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
 
-  <j:set var="helpURL" value="/plugin/graphiteIntegrator/help/global" />
+  <j:set var="helpURL" value="/plugin/influxdb/help/global" />
 
-  <f:section title="${%graphite_server_title}" >
+  <f:section title="${%influxdb_server_title}" >
 
-    <f:entry title="${%graphite_servers_added_title}" help="${helpURL}/graphite_servers_added.html">
-      <f:repeatable var="currentServer" items="${descriptor.servers}" add="${%graphite_servers_add_new}">
+    <f:entry title="${%influxdb_servers_added_title}" help="${helpURL}/influxdb_servers_added.html">
+      <f:repeatable var="currentServer" items="${descriptor.servers}" add="${%influxdb_servers_add_new}">
         <table width="100%" >
 
-          <f:entry title="${%graphite_servers_adding_description}"  help="${helpURL}/graphite_servers_adding_description.html" >
+          <f:entry title="${%influxdb_servers_adding_description}"  help="${helpURL}/influxdb_servers_adding_description.html" >
             <f:textbox name="serverBinding.description" value="${currentServer.description}" 
                 checkUrl="'${rootURL}/publisher/GraphitePublisher/checkDescription?value='+escape(this.value)"
             />
           </f:entry>
 
-          <f:entry title="${%graphite_servers_adding_ip}" help="${helpURL}/graphite_servers_adding_ip.html" field="ip">
+          <f:entry title="${%influxdb_servers_adding_ip}" help="${helpURL}/influxdb_servers_adding_ip.html" field="ip">
             <f:textbox name="serverBinding.ip"   value="${currentServer.ip}"
                 checkUrl="'${rootURL}/publisher/GraphitePublisher/checkIp?value='+escape(this.value)"
             />
           </f:entry>
 
-          <f:entry title="${%graphite_servers_adding_port}" help="${helpURL}/graphite_servers_adding_port.html" field="port">
+          <f:entry title="${%influxdb_servers_adding_port}" help="${helpURL}/influxdb_servers_adding_port.html" field="port">
             <f:textbox name="serverBinding.port"  value="${currentServer.port}"
                 checkUrl="'${rootURL}/publisher/GraphitePublisher/checkPort?value='+escape(this.value)"
            />
           </f:entry>
           
-          <f:entry title="${%graphite_servers_adding_protocol}" field="protocol">
+          <f:entry title="${%influxdb_servers_adding_protocol}" field="protocol">
     			<select name="serverBinding.protocol">
         			<option value="UDP">UDP</option>
         			<option value="TCP">TCP</option>
         		</select>
 		  </f:entry>
 
-          <f:validateButton title="${%test_graphite_server_connection}" progress="${%testing_graphite_server_connection}"  
+          <f:validateButton title="${%test_influxdb_server_connection}" progress="${%testing_influxdb_server_connection}"
                 method="testConnection" with="serverBinding.ip,serverBinding.port,serverBinding.protocol" />    
           
           <f:entry title="${%delete_current_server}" >
             <div align="right">
-              <f:repeatableDeleteButton value="${%delete_current_graphite_server_button}"/>
+              <f:repeatableDeleteButton value="${%delete_current_influxdb_server_button}"/>
             </div>
           </f:entry>
 
         </table>
       </f:repeatable>
 	</f:entry>
-	<f:entry title="${%base_graphite_queue_name}" help="${helpURL}/graphite_base_queue_name.html" field="baseQueueName" >
+	<f:entry title="${%base_influxdb_queue_name}" help="${helpURL}/influxdb_base_queue_name.html" field="baseQueueName" >
         <f:textbox checkUrl="'${rootURL}/publisher/GraphitePublisher/checkBaseQueueName?value='+escape(this.value)" />
     </f:entry>
   </f:section>
