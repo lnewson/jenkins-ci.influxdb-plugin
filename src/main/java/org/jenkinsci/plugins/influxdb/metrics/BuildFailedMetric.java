@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.graphiteIntegrator.metrics;
+package org.jenkinsci.plugins.influxdb.metrics;
 
 import hudson.model.Result;
 import hudson.model.AbstractBuild;
@@ -7,9 +7,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.UnknownHostException;
 
-import org.jenkinsci.plugins.graphiteIntegrator.loggers.GraphiteLogger;
-import org.jenkinsci.plugins.graphiteIntegrator.Metric;
-import org.jenkinsci.plugins.graphiteIntegrator.Server;
+import org.jenkinsci.plugins.influxdb.loggers.GraphiteLogger;
+import org.jenkinsci.plugins.influxdb.Metric;
+import org.jenkinsci.plugins.influxdb.Server;
 
 /**
  * 

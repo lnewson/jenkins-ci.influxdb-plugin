@@ -1,5 +1,5 @@
 
-package org.jenkinsci.plugins.graphiteIntegrator.loggers;
+package org.jenkinsci.plugins.influxdb.loggers;
 
 import java.io.DataOutputStream;
 import java.io.IOException;

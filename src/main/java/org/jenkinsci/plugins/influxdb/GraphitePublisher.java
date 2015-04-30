@@ -1,6 +1,6 @@
-package org.jenkinsci.plugins.graphiteIntegrator;
+package org.jenkinsci.plugins.influxdb;
 
-import org.jenkinsci.plugins.graphiteIntegrator.loggers.GraphiteLogger;
+import org.jenkinsci.plugins.influxdb.loggers.GraphiteLogger;
 
 import hudson.Extension;
 import hudson.Launcher;
@@ -16,14 +16,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jenkinsci.plugins.graphiteIntegrator.metrics.AbstractMetric;
-import org.jenkinsci.plugins.graphiteIntegrator.metrics.BuildDurationMetric;
-import org.jenkinsci.plugins.graphiteIntegrator.metrics.BuildFailedMetric;
-import org.jenkinsci.plugins.graphiteIntegrator.metrics.BuildSuccessfulMetric;
-import org.jenkinsci.plugins.graphiteIntegrator.metrics.CoberturaCodeCoverageMetric;
-import org.jenkinsci.plugins.graphiteIntegrator.metrics.FailTestsMetric;
-import org.jenkinsci.plugins.graphiteIntegrator.metrics.SkipTestsMetric;
-import org.jenkinsci.plugins.graphiteIntegrator.metrics.TotalTestsMetric;
+import org.jenkinsci.plugins.influxdb.metrics.AbstractMetric;
+import org.jenkinsci.plugins.influxdb.metrics.BuildDurationMetric;
+import org.jenkinsci.plugins.influxdb.metrics.BuildFailedMetric;
+import org.jenkinsci.plugins.influxdb.metrics.BuildSuccessfulMetric;
+import org.jenkinsci.plugins.influxdb.metrics.CoberturaCodeCoverageMetric;
+import org.jenkinsci.plugins.influxdb.metrics.FailTestsMetric;
+import org.jenkinsci.plugins.influxdb.metrics.SkipTestsMetric;
+import org.jenkinsci.plugins.influxdb.metrics.TotalTestsMetric;
 
 import utils.MetricsEnum;
 

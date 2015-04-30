@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.graphiteIntegrator;
+package org.jenkinsci.plugins.influxdb;
 
 import hudson.model.AbstractProject;
 import hudson.model.ModelObject;
