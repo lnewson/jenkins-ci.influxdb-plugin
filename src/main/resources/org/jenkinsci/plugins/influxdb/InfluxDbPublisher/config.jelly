@@ -1,12 +1,12 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
-  <j:set var="helpURL" value="/plugin/graphiteIntegrator/help/config" />
+  <j:set var="helpURL" value="/plugin/influxdb/help/config" />
   
-  <f:entry title="${%influxdb_server_title}" help="${helpURL}/choose-graphite-server.html">
+  <f:entry title="${%influxdb_server_title}" help="${helpURL}/choose-influxdb-server.html">
     <select class="setting-input" name="publisherBinding.selectedIp" >
       <j:forEach var="currentServer" items="${descriptor.servers}">
-        <f:option selected="${currentServer.ip==instance.selectedIp}" value="${currentServer.ip}" >${currentServer.description}</f:option>
+        <f:option selected="${currentServer.host==instance.selectedIp}" value="${currentServer.host}" >${currentServer.description}</f:option>
       </j:forEach>
     </select>
   </f:entry>
@@ -21,7 +21,7 @@
              </j:forEach>
            </select>
          </f:entry>
-        <f:entry title="${%choose_graphite_queue_name}" help="${helpURL}/choose-graphite-queue-name.html">
+        <f:entry title="${%choose_influxdb_queue_name}" help="${helpURL}/choose-influxdb-queue-name.html">
           <input class="setting-input" name="metricBinding.queueName"  type="text" value="${addedMetric.queueName}" />
         </f:entry>
         <f:entry title="${%delete_current_metric}">

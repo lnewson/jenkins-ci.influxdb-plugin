@@ -16,7 +16,10 @@ import utils.MetricsEnum;
 import java.util.Iterator;
 
 /**
+ *
+ * @author jrajala
  * @author joachimrodrigues
+ *
  * 
  */
 public final class DescriptorImpl extends BuildStepDescriptor<Publisher> implements ModelObject {
@@ -28,14 +31,11 @@ public final class DescriptorImpl extends BuildStepDescriptor<Publisher> impleme
 
 	private GraphiteValidator validator = new GraphiteValidator();
 
-	
-	private String baseQueueName;
-
 	/**
 	 * The default constructor.
 	 */
 	public DescriptorImpl() {
-		super(GraphitePublisher.class);
+		super(InfluxDbPublisher.class);
 		load();
 	}
 
@@ -97,7 +97,7 @@ public final class DescriptorImpl extends BuildStepDescriptor<Publisher> impleme
 	 */
 	@Override
 	public Publisher newInstance(StaplerRequest req, JSONObject formData) {
-		GraphitePublisher publisher = new GraphitePublisher();
+		InfluxDbPublisher publisher = new InfluxDbPublisher();
 		req.bindParameters(publisher, "publisherBinding.");
 		publisher.getMetrics().addAll(req.bindParametersToList(Metric.class, "metricBinding."));
 		return publisher;
@@ -111,14 +111,11 @@ public final class DescriptorImpl extends BuildStepDescriptor<Publisher> impleme
 	@Override
 	public boolean configure(StaplerRequest req, JSONObject formData) {
 		servers.replaceBy(req.bindParametersToList(Server.class, "serverBinding."));
-		baseQueueName = formData.optString("baseQueueName", "");
+		//databaseName = formData.optString("databaseName", "");
 		save();
 		return true;
 	}
 
-public String getBaseQueueName(){
-		return baseQueueName;
-	}
 
 
 	public GraphiteValidator getValidator() {
@@ -136,9 +133,6 @@ public CopyOnWriteMap<String, Metric> getMetricsMap() {
 }
 
 
-public void setBaseQueueName(String baseQueueName) {
-	this.baseQueueName = baseQueueName;
-}
 
 
 	/**
@@ -146,16 +140,16 @@ public void setBaseQueueName(String baseQueueName) {
 	 * @param port
 	 * @return form validation of connection status.
 	 */
-	public FormValidation doTestConnection(@QueryParameter("serverBinding.ip") final String ip,
+	public FormValidation doTestConnection(@QueryParameter("serverBinding.host") final String ip,
 			@QueryParameter("serverBinding.port") final String port,
 			@QueryParameter("serverBinding.protocol") final String protocol) {
 		if(protocol.equals("UDP")) {
 			return FormValidation.ok("UDP is configured");
 		}
 		else if(protocol.equals("TCP")) {
-			if (!validator.isIpPresent(ip) || !validator.isPortPresent(port)
+			if (!validator.isHostPresent(ip) || !validator.isPortPresent(port)
 					|| !validator.isListening(ip, Integer.parseInt(port))) {
-				return FormValidation.error("Server is not listening... Or ip:port are not correctly filled");
+				return FormValidation.error("Server is not listening... Or host:port are not correctly filled");
 			}
 
 			return FormValidation.ok("Server is listening");
@@ -166,17 +160,15 @@ public void setBaseQueueName(String baseQueueName) {
 
 	/**
 	 * @param value
-	 * @return  form validation of ip status.
+	 * @return  form validation of host status.
 	 */
-	public FormValidation doCheckIp(@QueryParameter final String value) {
-		if (!validator.isIpPresent(value)) {
-			return FormValidation.error("Please set a ip");
-		}
-		if (!validator.validateIpFormat(value)) {
-			return FormValidation.error("Please check the IP format");
+	public FormValidation doCheckHost(@QueryParameter final String value) {
+		if (!validator.isHostPresent(value)) {
+			return FormValidation.error("Please set a hostname");
 		}
 
-		return FormValidation.ok("IP is correctly configured");
+
+		return FormValidation.ok("Hostname is correctly configured");
 	}
 
 	/**
@@ -185,7 +177,7 @@ public void setBaseQueueName(String baseQueueName) {
 	 */
 	public FormValidation doCheckDescription(@QueryParameter final String value) {
 		if (!validator.isDescriptionPresent(value)) {
-			return FormValidation.error("Please set a description");
+			return FormValidation.error("Server description is mandatory");
 		}
 		if (validator.isDescriptionTooLong(value)) {
 			return FormValidation.error("Description is limited to 100 characters");
@@ -209,22 +201,18 @@ public void setBaseQueueName(String baseQueueName) {
 
 		return FormValidation.ok("Port is correctly configured");
 	}
-	
+
 	/**
 	 * 
 	 * @param value
 	 * @return  form validation of base queue name
 	 */
-	public FormValidation doCheckBaseQueueName(@QueryParameter final String value) {
+	public FormValidation doCheckDatabaseName(@QueryParameter final String value) {
 	    if(!validator.isBaseQueueNamePresent(value)){
-	        return FormValidation.ok();
+	        return FormValidation.error("Database name is mandatory");
 	    }
-	    
-	    if(!validator.validateBaseQueueName(value)){
-	        return FormValidation.error("Please ");
-	    }
-	    
-	    return FormValidation.ok("Base queue name is correctly Configured");
+
+	    return FormValidation.ok("Database name is correctly Configured");
 	    
 	}
 }

@@ -13,31 +13,36 @@
 
           <f:entry title="${%influxdb_servers_adding_description}"  help="${helpURL}/influxdb_servers_adding_description.html" >
             <f:textbox name="serverBinding.description" value="${currentServer.description}" 
-                checkUrl="'${rootURL}/publisher/GraphitePublisher/checkDescription?value='+escape(this.value)"
+                checkUrl="'${rootURL}/publisher/InfluxDbPublisher/checkDescription?value='+escape(this.value)"
             />
           </f:entry>
 
-          <f:entry title="${%influxdb_servers_adding_ip}" help="${helpURL}/influxdb_servers_adding_ip.html" field="ip">
-            <f:textbox name="serverBinding.ip"   value="${currentServer.ip}"
-                checkUrl="'${rootURL}/publisher/GraphitePublisher/checkIp?value='+escape(this.value)"
+          <f:entry title="${%influxdb_servers_adding_host}" help="${helpURL}/influxdb_servers_adding_host.html" field="host">
+            <f:textbox name="serverBinding.host"   value="${currentServer.host}"
+                checkUrl="'${rootURL}/publisher/InfluxDbPublisher/checkHost?value='+escape(this.value)"
             />
           </f:entry>
 
           <f:entry title="${%influxdb_servers_adding_port}" help="${helpURL}/influxdb_servers_adding_port.html" field="port">
             <f:textbox name="serverBinding.port"  value="${currentServer.port}"
-                checkUrl="'${rootURL}/publisher/GraphitePublisher/checkPort?value='+escape(this.value)"
+                checkUrl="'${rootURL}/publisher/InfluxDbPublisher/checkPort?value='+escape(this.value)"
            />
           </f:entry>
-          
-          <f:entry title="${%influxdb_servers_adding_protocol}" field="protocol">
-    			<select name="serverBinding.protocol">
-        			<option value="UDP">UDP</option>
-        			<option value="TCP">TCP</option>
-        		</select>
-		  </f:entry>
+
+          <f:entry title="${%influxdb_servers_adding_user}" help="${helpURL}/influxdb_servers_adding_user.html" field="user">
+            <f:textbox name="serverBinding.user"  value="${currentServer.user}"/>
+          </f:entry>
+
+          <f:entry title="${%influxdb_servers_adding_password}" help="${helpURL}/influxdb_servers_adding_password.html" field="password">
+            <f:textbox name="serverBinding.password"  value="${currentServer.password}"/>
+          </f:entry>
+
+          <f:entry title="${%influxdb_database_name}" help="${helpURL}/influxdb_database_name.html" field="databaseName" >
+            <f:textbox name="serverBinding.databaseName" value="${currentServer.databaseName}"  checkUrl="'${rootURL}/publisher/InfluxDbPublisher/checkDatabaseName?value='+escape(this.value)" />
+          </f:entry>
 
           <f:validateButton title="${%test_influxdb_server_connection}" progress="${%testing_influxdb_server_connection}"
-                method="testConnection" with="serverBinding.ip,serverBinding.port,serverBinding.protocol" />    
+                method="testConnection" with="serverBinding.host,serverBinding.port,serverBinding.user,serverBinding.password" />
           
           <f:entry title="${%delete_current_server}" >
             <div align="right">
@@ -48,8 +53,5 @@
         </table>
       </f:repeatable>
 	</f:entry>
-	<f:entry title="${%base_influxdb_queue_name}" help="${helpURL}/influxdb_base_queue_name.html" field="baseQueueName" >
-        <f:textbox checkUrl="'${rootURL}/publisher/GraphitePublisher/checkBaseQueueName?value='+escape(this.value)" />
-    </f:entry>
   </f:section>
 </j:jelly>

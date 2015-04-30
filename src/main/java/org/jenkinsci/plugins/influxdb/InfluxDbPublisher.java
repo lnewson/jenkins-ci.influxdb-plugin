@@ -28,10 +28,12 @@ import org.jenkinsci.plugins.influxdb.metrics.TotalTestsMetric;
 import utils.MetricsEnum;
 
 /**
+ *
+ * @author jrajala
  * @author joachimrodrigues
  * 
  */
-public class GraphitePublisher extends Notifier {
+public class InfluxDbPublisher extends Notifier {
 
 
     @Extension
@@ -53,13 +55,13 @@ public class GraphitePublisher extends Notifier {
     /**
      *
      */
-    public GraphitePublisher() {
+    public InfluxDbPublisher() {
     }
 
     /**
      *
      */
-    public GraphitePublisher(String ip, String metric, String protocol) {
+    public InfluxDbPublisher(String ip, String metric, String protocol) {
         this.selectedIp = ip;
         this.selectedMetric = metric;
         this.protocol = protocol;
@@ -99,7 +101,7 @@ public class GraphitePublisher extends Notifier {
         if (ipTemp == null) {
             Server[] servers = DESCRIPTOR.getServers();
             if (servers.length > 0) {
-                ipTemp = servers[0].getIp();
+                ipTemp = servers[0].getHost();
             }
         }
         return ipTemp;
@@ -146,7 +148,7 @@ public class GraphitePublisher extends Notifier {
             return servers[0];
         }
         for (Server server : servers) {
-            if (server.getIp().equals(selectedIp)) {
+            if (server.getHost().equals(selectedIp)) {
                 return server;
             }
         }
@@ -205,6 +207,7 @@ public class GraphitePublisher extends Notifier {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
 
+        /*
         if (build.getResult() == Result.ABORTED) {
             return true;
         }
@@ -223,15 +226,15 @@ public class GraphitePublisher extends Notifier {
 
         for (Metric metric : metrics) {
             if (metric.name.equals(MetricsEnum.BUILD_DURATION.name())) {
-                metricSender = new BuildDurationMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getBaseQueueName());
+                metricSender = new BuildDurationMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getDatabaseName());
                 metricSender.sendMetric(getServer(), metric);
             }
             if (metric.name.equals(MetricsEnum.BUILD_FAILED.name())) {
-                metricSender = new BuildFailedMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getBaseQueueName());
+                metricSender = new BuildFailedMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getDatabaseName());
                 metricSender.sendMetric(getServer(), metric);
             }
             if (metric.name.equals(MetricsEnum.BUILD_SUCCESSFUL.name())) {
-                metricSender = new BuildSuccessfulMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getBaseQueueName());
+                metricSender = new BuildSuccessfulMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getDatabaseName());
                 metricSender.sendMetric(getServer(), metric);
             }
             if (isCoberturaMetric(metric)) {
@@ -245,24 +248,24 @@ public class GraphitePublisher extends Notifier {
             // Added simple null check in for now to be safe.
             if (build.getTestResultAction() != null) {
                 if (metric.name.equals(MetricsEnum.FAIL_TESTS.name())) {
-                    metricSender = new FailTestsMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getBaseQueueName());
+                    metricSender = new FailTestsMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getDatabaseName());
                     metricSender.sendMetric(getServer(), metric);
                 }
                 if (metric.name.equals(MetricsEnum.SKIPED_TESTS.name())) {
-                    metricSender = new SkipTestsMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getBaseQueueName());
+                    metricSender = new SkipTestsMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getDatabaseName());
                     metricSender.sendMetric(getServer(), metric);
                 }
                 if (metric.name.equals(MetricsEnum.TOTAL_TESTS.name())) {
-                    metricSender = new TotalTestsMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getBaseQueueName());
+                    metricSender = new TotalTestsMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getDatabaseName());
                     metricSender.sendMetric(getServer(), metric);
                 }
             }
         }
         if (isCoberturaListInitialized(coberturaMetrics)) {
-            metricSender = new CoberturaCodeCoverageMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getBaseQueueName());
+            metricSender = new CoberturaCodeCoverageMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getDatabaseName());
             metricSender.sendMetric(getServer(), coberturaMetrics.toArray(new Metric[coberturaMetrics.size()]));
         }
-
+        */
         return true;
     }
 

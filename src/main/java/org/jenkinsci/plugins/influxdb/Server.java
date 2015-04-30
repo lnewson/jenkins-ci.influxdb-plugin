@@ -10,24 +10,20 @@ package org.jenkinsci.plugins.influxdb;
  */
 public class Server {
 
-    String ip;
+    String host;
 
     String port;
 
     String description;
 
-    String protocol;
+    String user;
 
-    public String getProtocol() {
-        return protocol;
-    }
+    String password;
 
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
-    }
+    String databaseName;
 
-    public String getIp() {
-        return ip;
+    public String getHost() {
+        return host;
     }
 
     public String getPort() {
@@ -38,8 +34,20 @@ public class Server {
         return description;
     }
 
-    public void setIp(String ip) {
-        this.ip = ip;
+    public String getUser() {
+        return user;
+    }
+
+    public String getDatabaseName() {
+        return databaseName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
     }
 
     public void setPort(String port) {
@@ -50,4 +58,17 @@ public class Server {
         this.description = description;
     }
 
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public void setDatabaseName(String databaseName) {
+        this.databaseName = databaseName;
+    }
 }

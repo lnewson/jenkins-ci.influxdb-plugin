@@ -21,17 +21,6 @@ public class GraphiteValidator {
     final String portPatern = "([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])";
 
     /**
-     * 
-     * @param ip
-     * @return whether ip is valid
-     */
-    public boolean validateIpFormat(String ip) {
-        Pattern pattern = Pattern.compile(this.ipPatern);
-        return pattern.matcher(ip).matches();
-    }
-
-
-    /**
      * @param port
      * @return whether port is valid
      */
@@ -58,10 +47,10 @@ public class GraphiteValidator {
 
     /**
      * @param ip
-     * @return whether ip is present
+     * @return whether host is present
      */
-    public boolean isIpPresent(String ip) {
-        if (ip.length() == 0) {
+    public boolean isHostPresent(String host) {
+        if (host.length() == 0) {
             return false;
         }
         return true;

@@ -48,25 +48,28 @@ public abstract class AbstractMetric {
 	 */
 	protected void sendMetric(Server server, Metric metric, String value) throws UnknownHostException,
 			IOException {
-		logger.println("Trying to send metric to Graphite server : " + server.getIp() + ":" + server.getPort() + ", Metric name: " + metric.getName() +  " On queue : "
+		logger.println("Trying to send metric to Graphite server : " + server.getHost() + ":" + server.getPort() + ", Metric name: " + metric.getName() +  " On queue : "
 				+ metric.getQueueName() + " With value : " + value);
+
+		/*
 		if (server.getProtocol().equals("UDP")) {
-			if (validator.isListening(server.getIp(), Integer.parseInt(server.getPort()))) {
-				graphiteLogger.logToGraphite(server.getIp(), server.getPort(), getCheckedBaseQueueName() + metric.getFullQueueAndName(), value.trim(), server.getProtocol());
-				logger.println("Metric: " + metric.getName() + " with value: "+ value + " correctly sent to " + server.getIp() + ":" + server.getPort()
+			if (validator.isListening(server.getHost(), Integer.parseInt(server.getPort()))) {
+				graphiteLogger.logToGraphite(server.getHost(), server.getPort(), getCheckedBaseQueueName() + metric.getFullQueueAndName(), value.trim(), server.getProtocol());
+				logger.println("Metric: " + metric.getName() + " with value: "+ value + " correctly sent to " + server.getHost() + ":" + server.getPort()
 					+ " on " +  getCheckedBaseQueueName() + metric.getFullQueueAndName() + "using UDP");
 			}
 		}
 		else if (server.getProtocol().equals("TCP")) {
-			if (validator.isListening(server.getIp(), Integer.parseInt(server.getPort()))) {
-				graphiteLogger.logToGraphite(server.getIp(), server.getPort(),  getCheckedBaseQueueName() + metric.getFullQueueAndName(), value.trim(), server.getProtocol());
-				logger.println("Metric: " + metric.getName() + " with value: "+ value + " correctly sent to " + server.getIp() + ":" + server.getPort()
+			if (validator.isListening(server.getHost(), Integer.parseInt(server.getPort()))) {
+				graphiteLogger.logToGraphite(server.getHost(), server.getPort(),  getCheckedBaseQueueName() + metric.getFullQueueAndName(), value.trim(), server.getProtocol());
+				logger.println("Metric: " + metric.getName() + " with value: "+ value + " correctly sent to " + server.getHost() + ":" + server.getPort()
 					+ " on " +  getCheckedBaseQueueName() + metric.getFullQueueAndName());
 			} else {
-				logger.println("Metric: " + metric.getName() + " with value: "+ value + " failed when sent to " + server.getIp() + ":" + server.getPort()
+				logger.println("Metric: " + metric.getName() + " with value: "+ value + " failed when sent to " + server.getHost() + ":" + server.getPort()
 					+ " on " +  getCheckedBaseQueueName() + metric.getFullQueueAndName());
 			}
 		}
+		*/
 	}
 	
 	/**
