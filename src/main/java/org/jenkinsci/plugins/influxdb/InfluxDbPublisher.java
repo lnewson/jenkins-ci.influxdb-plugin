@@ -1,5 +1,8 @@
 package org.jenkinsci.plugins.influxdb;
 
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
+import org.influxdb.dto.Serie;
 import org.jenkinsci.plugins.influxdb.loggers.GraphiteLogger;
 
 import hudson.Extension;
@@ -15,6 +18,7 @@ import hudson.tasks.Publisher;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.jenkinsci.plugins.influxdb.metrics.AbstractMetric;
 import org.jenkinsci.plugins.influxdb.metrics.BuildDurationMetric;
@@ -41,9 +45,8 @@ public class InfluxDbPublisher extends Notifier {
 
 
     private String selectedIp;
-
-
     private String selectedMetric;
+    private String serieName;
 
     /**
      *
@@ -105,6 +108,14 @@ public class InfluxDbPublisher extends Notifier {
             }
         }
         return ipTemp;
+    }
+
+    public String getSerieName() {
+        return serieName;
+    }
+
+    public void setSerieName(String serieName) {
+        this.serieName = serieName;
     }
 
     /**
@@ -207,6 +218,32 @@ public class InfluxDbPublisher extends Notifier {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
 
+        Server server = getServer();
+
+        InfluxDB influxDB = InfluxDBFactory.connect("http://" + server.getHost() + ":" + server.getPort(), server.getUser(), server.getPassword());
+
+        Serie metricSerie = new Serie.Builder(serieName).columns(
+                "build_number",
+                "build_time",
+                "build_status_message",
+                "project_name",
+                "project_description",
+                "health_score",
+                "executor_number"
+        ).
+                values(
+                        build.getNumber(),
+                        build.getDuration(),
+                        build.getBuildStatusSummary().message,
+                        build.getProject().getName(),
+                        build.getProject().getDescription(),
+                        build.getProject().getBuildHealth().getScore(),
+                        build.getExecutor().getNumber()
+                ).
+                build();
+
+        influxDB.write(server.getDatabaseName(), TimeUnit.MILLISECONDS, metricSerie);
+
         /*
         if (build.getResult() == Result.ABORTED) {
             return true;
@@ -290,4 +327,6 @@ public class InfluxDbPublisher extends Notifier {
 
         );
     }
+
+
 }

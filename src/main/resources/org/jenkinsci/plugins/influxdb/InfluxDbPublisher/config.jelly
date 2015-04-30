@@ -10,26 +10,10 @@
       </j:forEach>
     </select>
   </f:entry>
-  
-  <f:entry title="${%choose_metric_title_global}"  >
-    <f:repeatable var="addedMetric" items="${instance.metrics}" add="${%metric_add_new}">
-      <table width="100%"> 
-        <f:entry title="${%choose_metric_title}" help="${helpURL}/choose-metric.html">
-           <select class="setting-input" name="metricBinding.name" >
-             <j:forEach var="available" items="${descriptor.metrics}">
-               <f:option selected="${available.name==addedMetric.name}"  value="${available.name}" >${available.name}</f:option>
-             </j:forEach>
-           </select>
-         </f:entry>
-        <f:entry title="${%choose_influxdb_queue_name}" help="${helpURL}/choose-influxdb-queue-name.html">
-          <input class="setting-input" name="metricBinding.queueName"  type="text" value="${addedMetric.queueName}" />
-        </f:entry>
-        <f:entry title="${%delete_current_metric}">
-          <div align="right">
-            <f:repeatableDeleteButton value="${%delete_current_metric_button}"/>
-          </div>
-        </f:entry>
-      </table>
-    </f:repeatable>
+
+  <f:entry title="${%choose_influxdb_serie_name}" help="${helpURL}/choose-influxdb-serie-name.html">
+    <input class="setting-input" name="publisherBinding.serieName" type="text" value="${instance.serieName}" />
   </f:entry>
+
+
 </j:jelly>

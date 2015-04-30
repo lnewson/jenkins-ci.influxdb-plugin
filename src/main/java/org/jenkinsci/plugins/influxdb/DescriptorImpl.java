@@ -77,7 +77,7 @@ public final class DescriptorImpl extends BuildStepDescriptor<Publisher> impleme
 	 */
 	@Override
 	public String getDisplayName() {
-		return "Publish metrics to Graphite Server";
+		return "Publish metrics to InfluxDb Server";
 	}
 
 	/*
