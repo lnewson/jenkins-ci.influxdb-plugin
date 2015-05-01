@@ -41,9 +41,6 @@
             <f:textbox name="serverBinding.databaseName" value="${currentServer.databaseName}"  checkUrl="'${rootURL}/publisher/InfluxDbPublisher/checkDatabaseName?value='+escape(this.value)" />
           </f:entry>
 
-          <f:validateButton title="${%test_influxdb_server_connection}" progress="${%testing_influxdb_server_connection}"
-                method="testConnection" with="serverBinding.host,serverBinding.port,serverBinding.user,serverBinding.password" />
-          
           <f:entry title="${%delete_current_server}" >
             <div align="right">
               <f:repeatableDeleteButton value="${%delete_current_influxdb_server_button}"/>

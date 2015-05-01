@@ -5,7 +5,6 @@ import hudson.model.ModelObject;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
 import hudson.util.CopyOnWriteList;
-import hudson.util.CopyOnWriteMap;
 import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.QueryParameter;
@@ -139,7 +138,7 @@ public void setValidator(InfluxDbValidator validator) {
 	 * @return  form validation of base queue name
 	 */
 	public FormValidation doCheckDatabaseName(@QueryParameter final String value) {
-	    if(!validator.isBaseQueueNamePresent(value)){
+	    if(!validator.isDatabaseNamePresent(value)){
 	        return FormValidation.error("Database name is mandatory");
 	    }
 
