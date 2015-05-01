@@ -10,7 +10,6 @@ import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
-import utils.InfluxDbValidator;
 import utils.MetricsEnum;
 
 import java.util.Iterator;

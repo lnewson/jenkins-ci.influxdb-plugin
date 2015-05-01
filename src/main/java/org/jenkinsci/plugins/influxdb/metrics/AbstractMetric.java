@@ -11,7 +11,7 @@ import org.jenkinsci.plugins.influxdb.loggers.GraphiteLogger;
 import org.jenkinsci.plugins.influxdb.Metric;
 import org.jenkinsci.plugins.influxdb.Server;
 
-import utils.InfluxDbValidator;
+import org.jenkinsci.plugins.influxdb.InfluxDbValidator;
 
 /**
  * 

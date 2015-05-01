@@ -1,4 +1,4 @@
-package utils;
+package org.jenkinsci.plugins.influxdb;
 
 
 import java.io.IOException;
