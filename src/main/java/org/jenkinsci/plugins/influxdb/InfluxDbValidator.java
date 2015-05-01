@@ -19,7 +19,7 @@ public class InfluxDbValidator {
         int portNbr = 0;
         try {
             portNbr = Integer.parseInt(port);
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             return false;
         }
         return portNbr >= 1 && portNbr <= 65535;
