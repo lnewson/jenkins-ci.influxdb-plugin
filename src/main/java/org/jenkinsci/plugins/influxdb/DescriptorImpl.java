@@ -102,48 +102,6 @@ public final class DescriptorImpl extends BuildStepDescriptor<Publisher> impleme
 public void setValidator(InfluxDbValidator validator) {
 	this.validator = validator;
 }
-
-
-
-
-
-
-	/**
-	 * @param ip
-	 * @param port
-	 * @return form validation of connection status.
-	 */
-	public FormValidation doTestConnection(@QueryParameter("serverBinding.host") final String ip,
-			@QueryParameter("serverBinding.port") final String port,
-			@QueryParameter("serverBinding.protocol") final String protocol) {
-		if(protocol.equals("UDP")) {
-			return FormValidation.ok("UDP is configured");
-		}
-		else if(protocol.equals("TCP")) {
-			if (!validator.isHostPresent(ip) || !validator.isPortPresent(port)
-					|| !validator.isListening(ip, Integer.parseInt(port))) {
-				return FormValidation.error("Server is not listening... Or host:port are not correctly filled");
-			}
-
-			return FormValidation.ok("Server is listening");
-		} else {
-			return FormValidation.ok("Unknown protocol");
-		}
-	}
-
-	/**
-	 * @param value
-	 * @return  form validation of host status.
-	 */
-	public FormValidation doCheckHost(@QueryParameter final String value) {
-		if (!validator.isHostPresent(value)) {
-			return FormValidation.error("Please set a hostname");
-		}
-
-
-		return FormValidation.ok("Hostname is correctly configured");
-	}
-
 	/**
 	 * @param value
 	 * @return  form validation of description

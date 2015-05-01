@@ -32,4 +32,48 @@ public class InfluxDbValidatorTest {
     public void shouldNotAcceptAnythingThatDoesNotParseAsNumber() {
         Assert.assertFalse(validator.validatePortFormat("adsf"));
     }
+
+    @Test
+    public void shouldCheckIsHostPresent() {
+        Assert.assertFalse(validator.isHostPresent(null));
+        Assert.assertFalse(validator.isHostPresent(""));
+        Assert.assertTrue(validator.isHostPresent("hostname"));
+    }
+
+    @Test
+    public void shouldCheckIsPortPresent() {
+        Assert.assertFalse(validator.isPortPresent(null));
+        Assert.assertFalse(validator.isPortPresent(""));
+        Assert.assertTrue(validator.isPortPresent("1000"));
+    }
+
+    @Test
+    public void shouldCheckIsDescriptionPresent() {
+        Assert.assertFalse(validator.isDescriptionPresent(null));
+        Assert.assertFalse(validator.isDescriptionPresent(""));
+        Assert.assertTrue(validator.isDescriptionPresent("description"));
+    }
+
+    @Test
+    public void shouldNotAllowTooLongDescription() {
+        StringBuilder builder = new StringBuilder();
+        for(int i = 0 ; i <= 100; i++) {
+            builder.append("a");
+        }
+        String description = builder.toString();
+        Assert.assertTrue(description.length() > 100);
+        Assert.assertTrue(validator.isDescriptionTooLong(description));
+    }
+
+    @Test
+    public void shouldAllowDescriptionWhichIsNotTooLong() {
+        StringBuilder builder = new StringBuilder();
+        for(int i = 0 ; i <= 99; i++) {
+            builder.append("a");
+        }
+        String description = builder.toString();
+        Assert.assertTrue(description.length() == 100);
+        Assert.assertFalse(validator.isDescriptionTooLong(description));
+    }
 }
+

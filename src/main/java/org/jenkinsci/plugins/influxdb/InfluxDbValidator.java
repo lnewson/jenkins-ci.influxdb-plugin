@@ -27,26 +27,10 @@ public class InfluxDbValidator {
 
     /**
      * @param ip
-     * @param port
-     * @return whether isListening
-     */
-    public boolean isListening(String ip, int port) {
-
-        try {
-            Socket socket = new Socket();
-            socket.connect(new InetSocketAddress(ip, port), 5000);
-            return true;
-        } catch (IOException ex) {
-            return false;
-        }
-    }
-
-    /**
-     * @param ip
      * @return whether host is present
      */
     public boolean isHostPresent(String host) {
-        return host.length() != 0;
+        return host!= null && host.length() != 0;
     }
 
     /**
@@ -54,7 +38,7 @@ public class InfluxDbValidator {
      * @return whether port present 
      */
     public boolean isPortPresent(String port) {
-        return port.length() != 0;
+        return port!=null && port.length() != 0;
     }
 
     /**
@@ -62,7 +46,7 @@ public class InfluxDbValidator {
      * @return isDescriptionPresent
      */
     public boolean isDescriptionPresent(String description) {
-        return description.length() != 0;
+        return description!=null && description.length() != 0;
     }
 
     /**
