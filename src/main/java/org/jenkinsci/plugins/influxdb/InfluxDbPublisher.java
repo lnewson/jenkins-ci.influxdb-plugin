@@ -305,11 +305,11 @@ public class InfluxDbPublisher extends Notifier {
         return InfluxDBFactory.connect("http://" + server.getHost() + ":" + server.getPort(), server.getUser(), server.getPassword());
     }
 
-    private static final String COBERTURA_REPORT_FILE = "/target/cobertura/cobertura.ser";
+    private static final String COBERTURA_REPORT_FILE = "target/cobertura/cobertura.ser";
     private File coberturaFile = new File(COBERTURA_REPORT_FILE);
 
     private boolean hasCoberturaReport() {
-        return coberturaFile.exists() && coberturaFile.canRead();
+        return (coberturaFile != null && coberturaFile.exists() && coberturaFile.canRead());
     }
 
     private ProjectData getCoberturaProjectData() {
