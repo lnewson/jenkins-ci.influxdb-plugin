@@ -4,13 +4,11 @@ import hudson.tasks.test.AbstractTestResultAction;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Serie;
-import org.jenkinsci.plugins.influxdb.loggers.GraphiteLogger;
 
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
-import hudson.model.Result;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
@@ -20,15 +18,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import org.jenkinsci.plugins.influxdb.metrics.AbstractMetric;
-import org.jenkinsci.plugins.influxdb.metrics.BuildDurationMetric;
-import org.jenkinsci.plugins.influxdb.metrics.BuildFailedMetric;
-import org.jenkinsci.plugins.influxdb.metrics.BuildSuccessfulMetric;
-import org.jenkinsci.plugins.influxdb.metrics.CoberturaCodeCoverageMetric;
-import org.jenkinsci.plugins.influxdb.metrics.FailTestsMetric;
-import org.jenkinsci.plugins.influxdb.metrics.SkipTestsMetric;
-import org.jenkinsci.plugins.influxdb.metrics.TotalTestsMetric;
 
 import utils.MetricsEnum;
 
