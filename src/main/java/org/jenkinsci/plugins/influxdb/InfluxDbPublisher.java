@@ -2,6 +2,8 @@ package org.jenkinsci.plugins.influxdb;
 
 import hudson.tasks.test.AbstractTestResultAction;
 import net.sourceforge.cobertura.check.PackageCoverage;
+import net.sourceforge.cobertura.coveragedata.CoverageDataFileHandler;
+import net.sourceforge.cobertura.coveragedata.ProjectData;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Serie;
@@ -15,6 +17,7 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -106,7 +109,7 @@ public class InfluxDbPublisher extends Notifier {
     public void setSerieName(String serieName) {
         this.serieName = serieName;
     }
-    
+
     /**
      * 
      * @param ip
@@ -216,8 +219,42 @@ public class InfluxDbPublisher extends Notifier {
             addTestsSkipped(build, columnNames, values);
             addTestsTotal(build, columnNames, values);
         }
+        if(hasCoberturaReport()) {
+            ProjectData coberturaProjectData = getCoberturaProjectData();
+            addNumberOfPackages(coberturaProjectData, columnNames, values);
+            addNumberOfSourceFiles(coberturaProjectData, columnNames, values);
+            addNumberOfClasses(coberturaProjectData, columnNames, values);
+            addBranchCoverageRate(coberturaProjectData, columnNames, values);
+            addLineCoverageRate(coberturaProjectData, columnNames, values);
+        }
+
         return builder.columns(columnNames.toArray(new String[columnNames.size()])).values(values.toArray()).build();
 
+    }
+
+    private void addLineCoverageRate(ProjectData projectData, List<String> columnNames, List<Object> values) {
+        columnNames.add("cobertura_line_coverage_rate");
+        values.add(projectData.getLineCoverageRate());
+    }
+
+    private void addBranchCoverageRate(ProjectData projectData, List<String> columnNames, List<Object> values) {
+        columnNames.add("cobertura_branch_coverage_rate");
+        values.add(projectData.getBranchCoverageRate());
+    }
+
+    private void addNumberOfPackages(ProjectData projectData, List<String> columnNames, List<Object> values) {
+        columnNames.add("cobertura_number_of_packages");
+        values.add(projectData.getPackages().size());
+    }
+
+    private void addNumberOfSourceFiles(ProjectData projectData, List<String> columnNames, List<Object> values) {
+        columnNames.add("cobertura_number_of_sourcefiles");
+        values.add(projectData.getNumberOfSourceFiles());
+    }
+
+    private void addNumberOfClasses(ProjectData projectData, List<String> columnNames, List<Object> values) {
+        columnNames.add("cobertura_number_of_classes");
+        values.add(projectData.getNumberOfClasses());
     }
 
     private void addProjectName(AbstractBuild<?, ?> build, List<String> columnNames, List<Object> values) {
@@ -266,6 +303,17 @@ public class InfluxDbPublisher extends Notifier {
 
     private InfluxDB openInfluxDb(Server server) {
         return InfluxDBFactory.connect("http://" + server.getHost() + ":" + server.getPort(), server.getUser(), server.getPassword());
+    }
+
+    private static final String COBERTURA_REPORT_FILE = "/target/cobertura/cobertura.ser";
+    private File coberturaFile = new File(COBERTURA_REPORT_FILE);
+
+    private boolean hasCoberturaReport() {
+        return coberturaFile.exists() && coberturaFile.canRead();
+    }
+
+    private ProjectData getCoberturaProjectData() {
+        return CoverageDataFileHandler.loadCoverageData(coberturaFile);
     }
 
 		/*
