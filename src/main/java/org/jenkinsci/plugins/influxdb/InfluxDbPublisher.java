@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.influxdb;
 
 import hudson.tasks.test.AbstractTestResultAction;
+import net.sourceforge.cobertura.check.PackageCoverage;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Serie;
@@ -15,11 +16,11 @@ import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import utils.MetricsEnum;
 
 /**
  *
@@ -52,7 +53,6 @@ public class InfluxDbPublisher extends Notifier {
      */
     private String protocol;
 
-    private List<Metric> metrics = new ArrayList<Metric>();
 
     /**
      *
@@ -82,17 +82,7 @@ public class InfluxDbPublisher extends Notifier {
 		this.protocol = protocol;
 	}
 
-	public void setMetrics(List<Metric> metrics) {
-		this.metrics = metrics;
-	}
 
-	/**
-	 * 
-	 * @return metrics
-	 */
-    public List<Metric> getMetrics() {
-        return metrics;
-    }
 
     /**
      * 
@@ -116,22 +106,7 @@ public class InfluxDbPublisher extends Notifier {
     public void setSerieName(String serieName) {
         this.serieName = serieName;
     }
-
-    /**
-     * 
-     * @return selectedMetric
-     */
-    public String getSelectedMetric() {
-        String metricTemp = selectedMetric;
-        if (metricTemp == null) {
-            Metric[] metrics = DESCRIPTOR.getMetrics();
-            if (metrics.length > 0) {
-                metricTemp = metrics[0].getName();
-            }
-        }
-        return metricTemp;
-    }
-
+    
     /**
      * 
      * @param ip
@@ -222,66 +197,6 @@ public class InfluxDbPublisher extends Notifier {
         InfluxDB influxDB = openInfluxDb(server);
         influxDB.write(server.getDatabaseName(), TimeUnit.MILLISECONDS, metricSerie);
 
-        /*
-        if (build.getResult() == Result.ABORTED) {
-            return true;
-        }
-
-        if (getServer() == null) {
-            return false;
-        }
-
-        listener.getLogger().println("Connecting to " + getServer().getDescription());
-
-        GraphiteLogger graphiteLogger = new GraphiteLogger(listener.getLogger());
-
-        AbstractMetric metricSender = null;
-
-        List<Metric> coberturaMetrics = null;
-
-        for (Metric metric : metrics) {
-            if (metric.name.equals(MetricsEnum.BUILD_DURATION.name())) {
-                metricSender = new BuildDurationMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getDatabaseName());
-                metricSender.sendMetric(getServer(), metric);
-            }
-            if (metric.name.equals(MetricsEnum.BUILD_FAILED.name())) {
-                metricSender = new BuildFailedMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getDatabaseName());
-                metricSender.sendMetric(getServer(), metric);
-            }
-            if (metric.name.equals(MetricsEnum.BUILD_SUCCESSFUL.name())) {
-                metricSender = new BuildSuccessfulMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getDatabaseName());
-                metricSender.sendMetric(getServer(), metric);
-            }
-            if (isCoberturaMetric(metric)) {
-                if (!isCoberturaListInitialized(coberturaMetrics)) {
-                    coberturaMetrics = new ArrayList<Metric>();
-                }
-                coberturaMetrics.add(metric);
-            }
-            // If a Freestyle Build has been configured (without publishing
-            // JUnit XML Results) these will fail.
-            // Added simple null check in for now to be safe.
-            if (build.getTestResultAction() != null) {
-                if (metric.name.equals(MetricsEnum.FAIL_TESTS.name())) {
-                    metricSender = new FailTestsMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getDatabaseName());
-                    metricSender.sendMetric(getServer(), metric);
-                }
-                if (metric.name.equals(MetricsEnum.SKIPED_TESTS.name())) {
-                    metricSender = new SkipTestsMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getDatabaseName());
-                    metricSender.sendMetric(getServer(), metric);
-                }
-                if (metric.name.equals(MetricsEnum.TOTAL_TESTS.name())) {
-                    metricSender = new TotalTestsMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getDatabaseName());
-                    metricSender.sendMetric(getServer(), metric);
-                }
-            }
-        }
-        if (isCoberturaListInitialized(coberturaMetrics)) {
-            metricSender = new CoberturaCodeCoverageMetric(build, listener.getLogger(), graphiteLogger, DESCRIPTOR.getDatabaseName());
-            metricSender.sendMetric(getServer(), coberturaMetrics.toArray(new Metric[coberturaMetrics.size()]));
-        }
-        */
-
         return true;
     }
 
@@ -353,4 +268,67 @@ public class InfluxDbPublisher extends Notifier {
         return InfluxDBFactory.connect("http://" + server.getHost() + ":" + server.getPort(), server.getUser(), server.getPassword());
     }
 
+		/*
+		File dataFile = new File(build.getWorkspace() + "/target/cobertura/cobertura.ser");
+
+		ProjectData projectData = CoverageDataFileHandler.loadCoverageData(dataFile);
+
+		if (projectData == null) {
+			logger.print("Error: Unable to read from data file " + dataFile.getAbsolutePath());
+		}
+
+		double totalLines = 0;
+		double totalLinesCovered = 0;
+		double totalBranches = 0;
+		double totalBranchesCovered = 0;
+
+		Iterator<?> iter = projectData.getClasses().iterator();
+		while (iter.hasNext()) {
+			ClassData classData = (ClassData) iter.next();
+
+			totalBranches += classData.getNumberOfValidBranches();
+			totalBranchesCovered += classData.getNumberOfCoveredBranches();
+
+			totalLines += classData.getNumberOfValidLines();
+			totalLinesCovered += classData.getNumberOfCoveredLines();
+
+			// for next release :
+			// PackageCoverage packageCoverage = getPackageCoverage(classData.getPackageName());
+			// packageCoverage.addBranchCount(classData.getNumberOfValidBranches());
+			// packageCoverage.addBranchCoverage(classData.getNumberOfCoveredBranches());
+			//
+			// packageCoverage.addLineCount(classData.getNumberOfValidLines());
+			// packageCoverage.addLineCoverage(classData.getNumberOfCoveredLines());
+			//
+			// + percentage(classData.getLineCoverageRate()) + "%, branch coverage rate: "
+			// + percentage(classData.getBranchCoverageRate()) + "%");
+
+		}
+
+		for (int i = 0; i < metrics.length; i++) {
+			if (metrics[i].getName().equals(MetricsEnum.COBERTURA_TOTAL_LINE_COVERAGE.name())) {
+				sendMetric(server, metrics[i], percentage(totalLinesCovered / totalLines));
+			}
+			if (metrics[i].getName().equals(MetricsEnum.COBERTURA_TOTAL_BRANCH_COVERAGE.name())) {
+				sendMetric(server, metrics[i], percentage(totalBranchesCovered / totalBranches));
+			}
+		}
+
+
+    Map<String, PackageCoverage> packageCoverageMap = new HashMap();
+
+    private PackageCoverage getPackageCoverage(String packageName) {
+        PackageCoverage packageCoverage = packageCoverageMap.get(packageName);
+        if (packageCoverage == null) {
+            packageCoverage = new PackageCoverage();
+            packageCoverageMap.put(packageName, packageCoverage);
+        }
+        return packageCoverage;
+    }
+
+    private String percentage(double coverateRate) {
+        BigDecimal decimal = new BigDecimal(coverateRate * 100);
+        return decimal.setScale(1, BigDecimal.ROUND_DOWN).toString();
+    }
+*/
 }

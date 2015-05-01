@@ -10,7 +10,6 @@ import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
-import utils.MetricsEnum;
 
 import java.util.Iterator;
 
@@ -22,9 +21,6 @@ import java.util.Iterator;
  * 
  */
 public final class DescriptorImpl extends BuildStepDescriptor<Publisher> implements ModelObject {
-
-	
-	private final CopyOnWriteMap<String, Metric> metricsMap = new CopyOnWriteMap.Hash();
 
 	private final CopyOnWriteList<Server> servers = new CopyOnWriteList<Server>();
 
@@ -38,24 +34,6 @@ public final class DescriptorImpl extends BuildStepDescriptor<Publisher> impleme
 		load();
 	}
 
-
-	/**
-	 * @return metrics
-	 */
-	public Metric[] getMetrics() {
-		metricsMap.clear();
-		MetricsEnum[] values = MetricsEnum.values();
-		Metric metric = null;
-		for (int i = 0; i < values.length; i++) {
-			metric = new Metric();
-			metric.setName(values[i].name());
-			metric.setDescription(values[i].toString());
-			metricsMap.put(values[i].name(), metric);
-		}
-		return metricsMap.values().toArray(new Metric[values.length]);
-	}
-
-	
 	/**
 	 * @return servers
 	 */
@@ -98,7 +76,6 @@ public final class DescriptorImpl extends BuildStepDescriptor<Publisher> impleme
 	public Publisher newInstance(StaplerRequest req, JSONObject formData) {
 		InfluxDbPublisher publisher = new InfluxDbPublisher();
 		req.bindParameters(publisher, "publisherBinding.");
-		publisher.getMetrics().addAll(req.bindParametersToList(Metric.class, "metricBinding."));
 		return publisher;
 	}
 
@@ -127,9 +104,6 @@ public void setValidator(InfluxDbValidator validator) {
 }
 
 
-public CopyOnWriteMap<String, Metric> getMetricsMap() {
-	return metricsMap;
-}
 
 
 
