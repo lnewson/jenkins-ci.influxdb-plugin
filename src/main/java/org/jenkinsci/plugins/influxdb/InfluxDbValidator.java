@@ -15,19 +15,14 @@ import org.apache.commons.lang.StringUtils;
  */
 public class InfluxDbValidator {
 
-   
-   
-    final String ipPatern = "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
-
-    final String portPatern = "([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])";
-
-    /**
-     * @param port
-     * @return whether port is valid
-     */
     public boolean validatePortFormat(String port) {
-        Pattern pattern = Pattern.compile(this.portPatern);
-        return pattern.matcher(port).matches();
+        int portNbr = 0;
+        try {
+            portNbr = Integer.parseInt(port);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return portNbr >= 1 && portNbr <= 65535;
     }
 
     /**
