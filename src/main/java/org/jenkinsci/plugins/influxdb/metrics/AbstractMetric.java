@@ -11,7 +11,7 @@ import org.jenkinsci.plugins.influxdb.loggers.GraphiteLogger;
 import org.jenkinsci.plugins.influxdb.Metric;
 import org.jenkinsci.plugins.influxdb.Server;
 
-import utils.GraphiteValidator;
+import utils.InfluxDbValidator;
 
 /**
  * 
@@ -19,7 +19,7 @@ import utils.GraphiteValidator;
  */
 public abstract class AbstractMetric {
 
-	protected GraphiteValidator validator = new GraphiteValidator();
+	protected InfluxDbValidator validator = new InfluxDbValidator();
 	protected final AbstractBuild<?, ?> build;
 	protected final PrintStream logger;
 	protected final GraphiteLogger graphiteLogger;

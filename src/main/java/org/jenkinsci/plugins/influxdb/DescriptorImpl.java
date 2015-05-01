@@ -10,7 +10,7 @@ import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
-import utils.GraphiteValidator;
+import utils.InfluxDbValidator;
 import utils.MetricsEnum;
 
 import java.util.Iterator;
@@ -29,7 +29,7 @@ public final class DescriptorImpl extends BuildStepDescriptor<Publisher> impleme
 
 	private final CopyOnWriteList<Server> servers = new CopyOnWriteList<Server>();
 
-	private GraphiteValidator validator = new GraphiteValidator();
+	private InfluxDbValidator validator = new InfluxDbValidator();
 
 	/**
 	 * The default constructor.
@@ -118,12 +118,12 @@ public final class DescriptorImpl extends BuildStepDescriptor<Publisher> impleme
 
 
 
-	public GraphiteValidator getValidator() {
+	public InfluxDbValidator getValidator() {
 	return validator;
 }
 
 
-public void setValidator(GraphiteValidator validator) {
+public void setValidator(InfluxDbValidator validator) {
 	this.validator = validator;
 }
 

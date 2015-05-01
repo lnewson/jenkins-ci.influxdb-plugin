@@ -12,7 +12,7 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author joachimrodrigues
  */
-public class GraphiteValidator {
+public class InfluxDbValidator {
 
    
    
