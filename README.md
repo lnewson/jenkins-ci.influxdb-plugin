@@ -1,4 +1,9 @@
-This plugin allows you to send the following metrics to one or more graphite servers: number of tests, tests skipped, tests failed, build duration, cobertura total line coverage and cobertura total branch coverage.
+This plugin allows you to send the build metrics to InfluxDb servers to be used for analysis and radiators.
 
+Currently supports:
+   - project_name
+   - build_number
+   - build_time
+   - build_status_message
+   - project_build_health
 
-If you don't have a graphite server you can use : https://www.hostedgraphite.com to test.
