@@ -35,7 +35,7 @@ public class BuildDurationMetric extends AbstractMetric {
 	 * @throws IOException
 	 */
 	@Override
-	public void sendMetric(Server server, Metric... metric) throws UnknownHostException, IOException {
+	public void sendMetric(Server server, Metric... metric) throws IOException {
 
 		String metricToSend = String.valueOf((new Long(build.getDuration()).intValue() / 1000));
 

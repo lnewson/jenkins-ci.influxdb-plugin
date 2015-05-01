@@ -5,7 +5,8 @@
 package org.jenkinsci.plugins.influxdb;
 
 /**
- * 
+ *
+ * @author jrajala-eficode
  * @author joachimrodrigues
  */
 public class Server {

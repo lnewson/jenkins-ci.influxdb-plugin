@@ -36,7 +36,7 @@ public class GraphiteLogger {
      * @throws UnknownHostException
      * @throws IOException
      */
-    public void logToGraphite(String graphiteHost, String graphitePort, String queue, String metric, String protocol) throws UnknownHostException, IOException {
+    public void logToGraphite(String graphiteHost, String graphitePort, String queue, String metric, String protocol) throws IOException {
     	
     	if (protocol.equals("TCP")) {
     		logToGraphiteTCP(graphiteHost, graphitePort, queue, metric);
@@ -47,7 +47,7 @@ public class GraphiteLogger {
     	}
     }
     
-    private void logToGraphiteUDP(String graphiteHost, String graphitePort, String queue, String metric) throws UnknownHostException, IOException {
+    private void logToGraphiteUDP(String graphiteHost, String graphitePort, String queue, String metric) throws IOException {
         //TMP to test
         long timestamp = System.currentTimeMillis()/1000;
         String data = queue + " " + metric + " " + timestamp + "\n";
@@ -66,7 +66,7 @@ public class GraphiteLogger {
         }
     }
     
-    private void logToGraphiteTCP(String graphiteHost, String graphitePort, String queue, String metric) throws UnknownHostException, IOException  {
+    private void logToGraphiteTCP(String graphiteHost, String graphitePort, String queue, String metric) throws IOException  {
     	Socket conn = new Socket(graphiteHost, Integer.parseInt(graphitePort));
 		
         DataOutputStream dos = new DataOutputStream(conn.getOutputStream());

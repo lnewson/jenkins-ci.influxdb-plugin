@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 
 /**
  *
+ * @author jrajala-eficode
  * @author joachimrodrigues
  */
 public class InfluxDbValidator {
@@ -50,10 +51,7 @@ public class InfluxDbValidator {
      * @return whether host is present
      */
     public boolean isHostPresent(String host) {
-        if (host.length() == 0) {
-            return false;
-        }
-        return true;
+        return host.length() != 0;
     }
 
     /**
@@ -61,10 +59,7 @@ public class InfluxDbValidator {
      * @return whether port present 
      */
     public boolean isPortPresent(String port) {
-        if (port.length() == 0) {
-            return false;
-        }
-        return true;
+        return port.length() != 0;
     }
 
     /**
@@ -72,10 +67,7 @@ public class InfluxDbValidator {
      * @return isDescriptionPresent
      */
     public boolean isDescriptionPresent(String description) {
-        if (description.length() == 0) {
-            return false;
-        }
-        return true;
+        return description.length() != 0;
     }
 
     /**
@@ -83,10 +75,7 @@ public class InfluxDbValidator {
      * @return isDescriptionTooLong
      */
     public boolean isDescriptionTooLong(String description) {
-        if (description.length() > 100) {
-            return true;
-        }
-        return false;
+        return description.length() > 100;
     }
     
     /**
@@ -99,10 +88,7 @@ public class InfluxDbValidator {
     }
 
     public boolean validateBaseQueueName(String value) {
-        if(value.endsWith(".")){
-            return false;
-        }
-        return true;
+        return !value.endsWith(".");
     }
 
 }

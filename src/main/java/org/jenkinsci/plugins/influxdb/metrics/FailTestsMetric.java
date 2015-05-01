@@ -38,7 +38,7 @@ public class FailTestsMetric extends AbstractMetric {
 	 * @throws IOException
 	 */
 	@Override
-	public void sendMetric(Server server, Metric... metric) throws UnknownHostException, IOException {
+	public void sendMetric(Server server, Metric... metric) throws IOException {
 
 		String metricToSend = Integer.toString(build.getAction(AbstractTestResultAction.class).getFailCount());
 

@@ -35,7 +35,7 @@ public class BuildFailedMetric extends AbstractMetric {
      * @throws IOException
      */
     @Override
-    public void sendMetric(Server server, Metric... metric) throws UnknownHostException, IOException {
+    public void sendMetric(Server server, Metric... metric) throws IOException {
         
         if(build.getResult().isWorseThan(Result.UNSTABLE)){
             String metricToSend = String.valueOf(1);

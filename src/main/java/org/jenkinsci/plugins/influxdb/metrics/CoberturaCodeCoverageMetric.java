@@ -42,7 +42,7 @@ public class CoberturaCodeCoverageMetric extends AbstractMetric {
 	}
 
 	@Override
-	public void sendMetric(Server server, Metric... metrics) throws UnknownHostException, IOException {
+	public void sendMetric(Server server, Metric... metrics) throws IOException {
 
 		File dataFile = new File(build.getWorkspace() + "/target/cobertura/cobertura.ser");
 

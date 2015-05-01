@@ -17,7 +17,7 @@ import java.util.Iterator;
 
 /**
  *
- * @author jrajala
+ * @author jrajala-eficode
  * @author joachimrodrigues
  *
  * 

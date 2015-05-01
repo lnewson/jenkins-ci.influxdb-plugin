@@ -33,7 +33,7 @@ import utils.MetricsEnum;
 
 /**
  *
- * @author jrajala
+ * @author jrajala-eficode
  * @author joachimrodrigues
  * 
  */
@@ -43,6 +43,11 @@ public class InfluxDbPublisher extends Notifier {
     @Extension
     public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
+    public static final String PROJECT_NAME = "project_name";
+    public static final String BUILD_NUMBER = "build_number";
+    public static final String BUILD_TIME = "build_time";
+    public static final String BUILD_STATUS_MESSAGE = "build_status_message";
+    public static final String PROJECT_BUILD_HEALTH = "project_build_health";
 
     private String selectedIp;
     private String selectedMetric;
@@ -219,29 +224,8 @@ public class InfluxDbPublisher extends Notifier {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
 
         Server server = getServer();
-
-        InfluxDB influxDB = InfluxDBFactory.connect("http://" + server.getHost() + ":" + server.getPort(), server.getUser(), server.getPassword());
-
-        Serie metricSerie = new Serie.Builder(serieName).columns(
-                "build_number",
-                "build_time",
-                "build_status_message",
-                "project_name",
-                "project_description",
-                "health_score",
-                "executor_number"
-        ).
-                values(
-                        build.getNumber(),
-                        build.getDuration(),
-                        build.getBuildStatusSummary().message,
-                        build.getProject().getName(),
-                        build.getProject().getDescription(),
-                        build.getProject().getBuildHealth().getScore(),
-                        build.getExecutor().getNumber()
-                ).
-                build();
-
+        Serie metricSerie = buildSerieFromBuild(build);
+        InfluxDB influxDB = openInfluxDb(server);
         influxDB.write(server.getDatabaseName(), TimeUnit.MILLISECONDS, metricSerie);
 
         /*
@@ -303,30 +287,53 @@ public class InfluxDbPublisher extends Notifier {
             metricSender.sendMetric(getServer(), coberturaMetrics.toArray(new Metric[coberturaMetrics.size()]));
         }
         */
+
         return true;
     }
 
-    /**
-     * @param coberturaMetrics
-     * @return isCoberturaListInitialized
-     */
-    private boolean isCoberturaListInitialized(List<Metric> coberturaMetrics) {
-        return coberturaMetrics != null;
+    private Serie buildSerieFromBuild(AbstractBuild<?, ?> build) {
+        Serie.Builder builder = new Serie.Builder(serieName);
+
+        List<String> columnNames = new ArrayList<String>();
+        List<Object> values = new ArrayList<Object>();
+
+        addProjectName(build, columnNames, values);
+        addBuildNumber(build, columnNames, values);
+        addBuildDuration(build, columnNames, values);
+        addBuildStatusSummaryMesssage(build, columnNames, values);
+        addProjectBuildHealth(build, columnNames, values);
+
+        return builder.columns(columnNames.toArray(new String[columnNames.size()])).values(values.toArray()).build();
+
     }
 
-    /**
-     * @param metric
-     * @return isCoberturaMetric
-     */
-    private boolean isCoberturaMetric(Metric metric) {
-        return (// metric.name.equals(MetricsEnum.COBERTURA_PACKAGE_BRANCH_COVERAGE.name())
-                // ||
-                // metric.name.equals(MetricsEnum.COBERTURA_PACKAGE_LINE_COVERAGE.name())
-                // ||
-        metric.name.equals(MetricsEnum.COBERTURA_TOTAL_BRANCH_COVERAGE.name()) || metric.name.equals(MetricsEnum.COBERTURA_TOTAL_LINE_COVERAGE.name())
-
-        );
+    private void addProjectName(AbstractBuild<?, ?> build, List<String> columnNames, List<Object> values) {
+        columnNames.add(PROJECT_NAME);
+        values.add(build.getProject().getName());
     }
 
+    private void addBuildNumber(AbstractBuild<?, ?> build, List<String> columnNames, List<Object> values) {
+        columnNames.add(BUILD_NUMBER);
+        values.add(build.getNumber());
+    }
+
+    private void addBuildDuration(AbstractBuild<?, ?> build, List<String> columnNames, List<Object> values) {
+        columnNames.add(BUILD_TIME);
+        values.add(build.getDuration());
+    }
+
+    private void addBuildStatusSummaryMesssage(AbstractBuild<?, ?> build, List<String> columnNames, List<Object> values) {
+        columnNames.add(BUILD_STATUS_MESSAGE);
+        values.add(build.getBuildStatusSummary().message);
+    }
+
+    private void addProjectBuildHealth(AbstractBuild<?, ?> build, List<String> columnNames, List<Object> values) {
+        columnNames.add(PROJECT_BUILD_HEALTH);
+        values.add(build.getProject().getBuildHealth().getScore());
+    }
+
+    private InfluxDB openInfluxDb(Server server) {
+        return InfluxDBFactory.connect("http://" + server.getHost() + ":" + server.getPort(), server.getUser(), server.getPassword());
+    }
 
 }

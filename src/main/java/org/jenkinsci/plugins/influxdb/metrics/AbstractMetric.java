@@ -46,7 +46,7 @@ public abstract class AbstractMetric {
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
-	protected void sendMetric(Server server, Metric metric, String value) throws UnknownHostException,
+	protected void sendMetric(Server server, Metric metric, String value) throws
 			IOException {
 		logger.println("Trying to send metric to Graphite server : " + server.getHost() + ":" + server.getPort() + ", Metric name: " + metric.getName() +  " On queue : "
 				+ metric.getQueueName() + " With value : " + value);
@@ -90,5 +90,5 @@ public abstract class AbstractMetric {
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
-	public abstract void sendMetric(Server server, Metric... metric) throws UnknownHostException, IOException;
+	public abstract void sendMetric(Server server, Metric... metric) throws IOException;
 }
