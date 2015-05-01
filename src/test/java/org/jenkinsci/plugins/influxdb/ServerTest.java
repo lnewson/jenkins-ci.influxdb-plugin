@@ -21,4 +21,33 @@ public class ServerTest {
         Assert.assertEquals("hostname", server.getHost());
     }
 
+    @Test
+    public void shouldAllowSettingPort() {
+        server.setPort("1");
+        Assert.assertEquals("1", server.getPort());
+    }
+
+    @Test
+    public void shouldAllowSettingDescription() {
+        server.setDescription("description");
+        Assert.assertEquals("description", server.getDescription());
+    }
+
+    @Test
+    public void shouldAllowSettingDatabaseName() {
+        server.setDatabaseName("database");
+        Assert.assertEquals("database", server.getDatabaseName());
+    }
+
+    @Test
+    public void shouldAllowSettingUser() {
+        server.setUser("user");
+        Assert.assertEquals("user", server.getUser());
+    }
+
+    @Test
+    public void shouldAllowSettingPassword() {
+        server.setPassword("pass");
+        Assert.assertEquals("pass", server.getPassword());
+    }
 }
