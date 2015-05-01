@@ -1,8 +1,9 @@
 package org.jenkinsci.plugins.influxdb;
 
 import hudson.tasks.test.AbstractTestResultAction;
-import net.sourceforge.cobertura.check.PackageCoverage;
+import net.sourceforge.cobertura.coveragedata.ClassData;
 import net.sourceforge.cobertura.coveragedata.CoverageDataFileHandler;
+import net.sourceforge.cobertura.coveragedata.PackageData;
 import net.sourceforge.cobertura.coveragedata.ProjectData;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
@@ -19,7 +20,6 @@ import hudson.tasks.Publisher;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -45,37 +45,32 @@ public class InfluxDbPublisher extends Notifier {
     public static final String TESTS_FAILED = "tests_failed";
     public static final String TESTS_SKIPPED = "tests_skipped";
     public static final String TESTS_TOTAL = "tests_total";
+    public static final String COBERTURA_PACKAGE_COVERAGE_RATE = "cobertura_package_coverage_rate";
+    public static final String COBERTURA_CLASS_COVERAGE_RATE = "cobertura_class_coverage_rate";
+    public static final String COBERTURA_LINE_COVERAGE_RATE = "cobertura_line_coverage_rate";
+    public static final String COBERTURA_BRANCH_COVERAGE_RATE = "cobertura_branch_coverage_rate";
+    public static final String COBERTURA_NUMBER_OF_PACKAGES = "cobertura_number_of_packages";
+    public static final String COBERTURA_NUMBER_OF_SOURCEFILES = "cobertura_number_of_sourcefiles";
+    public static final String COBERTURA_NUMBER_OF_CLASSES = "cobertura_number_of_classes";
 
+    private static final String COBERTURA_REPORT_FILE = "/target/cobertura/cobertura.ser";
 
     private String selectedIp;
-    private String selectedMetric;
     private String serieName;
 
-    /**
-     *
-     */
     private String protocol;
 
 
-    /**
-     *
-     */
     public InfluxDbPublisher() {
     }
 
-    /**
-     *
-     */
     public InfluxDbPublisher(String ip, String metric, String protocol) {
         this.selectedIp = ip;
-        this.selectedMetric = metric;
         this.protocol = protocol;
         System.out.println("IP: " + ip);
         System.out.println("Protocol: " + protocol);
 
     }
-    
-    
 
     public String getProtocol() {
 		return protocol;
@@ -85,12 +80,6 @@ public class InfluxDbPublisher extends Notifier {
 		this.protocol = protocol;
 	}
 
-
-
-    /**
-     * 
-     * @return selectedIp
-     */
     public String getSelectedIp() {
         String ipTemp = selectedIp;
         if (ipTemp == null) {
@@ -110,26 +99,10 @@ public class InfluxDbPublisher extends Notifier {
         this.serieName = serieName;
     }
 
-    /**
-     * 
-     * @param ip
-     */
     public void setSelectedIp(String ip) {
         this.selectedIp = ip;
     }
 
-    /**
-     * 
-     * @param metric
-     */
-    public void setSelectedMetric(String metric) {
-        this.selectedMetric = metric;
-    }
-
-    /**
-     * 
-     * @return server
-     */
     public Server getServer() {
         Server[] servers = DESCRIPTOR.getServers();
         if (selectedIp == null && servers.length > 0) {
@@ -214,46 +187,78 @@ public class InfluxDbPublisher extends Notifier {
         addBuildDuration(build, columnNames, values);
         addBuildStatusSummaryMesssage(build, columnNames, values);
         addProjectBuildHealth(build, columnNames, values);
+
         if(hasTestResults(build)) {
             addTestsFailed(build, columnNames, values);
             addTestsSkipped(build, columnNames, values);
             addTestsTotal(build, columnNames, values);
         }
-        if(hasCoberturaReport()) {
-            ProjectData coberturaProjectData = getCoberturaProjectData();
+
+        if(hasCoberturaReport(build)) {
+            ProjectData coberturaProjectData = getCoberturaProjectData(build);
             addNumberOfPackages(coberturaProjectData, columnNames, values);
             addNumberOfSourceFiles(coberturaProjectData, columnNames, values);
             addNumberOfClasses(coberturaProjectData, columnNames, values);
             addBranchCoverageRate(coberturaProjectData, columnNames, values);
             addLineCoverageRate(coberturaProjectData, columnNames, values);
+            addPackageCoverage(coberturaProjectData, columnNames, values);
+            addClassCoverage(coberturaProjectData, columnNames, values);
         }
 
         return builder.columns(columnNames.toArray(new String[columnNames.size()])).values(values.toArray()).build();
 
     }
 
+    private void addPackageCoverage(ProjectData projectData, List<String> columnNames, List<Object> values) {
+        double totalPacakges = projectData.getPackages().size();
+        double packagesCovered = 0;
+        for(Object nextPackage : projectData.getPackages()) {
+            PackageData packageData = (PackageData) nextPackage;
+            if(packageData.getLineCoverageRate() > 0)
+                packagesCovered++;
+        }
+        double packageCoverage = packagesCovered / totalPacakges;
+
+        columnNames.add(COBERTURA_PACKAGE_COVERAGE_RATE);
+        values.add(packageCoverage*100d);
+    }
+
+    private void addClassCoverage(ProjectData projectData, List<String> columnNames, List<Object> values) {
+        double totalClasses = projectData.getNumberOfClasses();
+        double classesCovered = 0;
+        for(Object nextClass : projectData.getClasses()) {
+            ClassData classData = (ClassData) nextClass;
+            if(classData.getLineCoverageRate() > 0)
+                classesCovered++;
+        }
+        double classCoverage = classesCovered / totalClasses;
+
+        columnNames.add(COBERTURA_CLASS_COVERAGE_RATE);
+        values.add(classCoverage*100d);
+    }
+
     private void addLineCoverageRate(ProjectData projectData, List<String> columnNames, List<Object> values) {
-        columnNames.add("cobertura_line_coverage_rate");
-        values.add(projectData.getLineCoverageRate());
+        columnNames.add(COBERTURA_LINE_COVERAGE_RATE);
+        values.add(projectData.getLineCoverageRate()*100d);
     }
 
     private void addBranchCoverageRate(ProjectData projectData, List<String> columnNames, List<Object> values) {
-        columnNames.add("cobertura_branch_coverage_rate");
-        values.add(projectData.getBranchCoverageRate());
+        columnNames.add(COBERTURA_BRANCH_COVERAGE_RATE);
+        values.add(projectData.getBranchCoverageRate()*100d);
     }
 
     private void addNumberOfPackages(ProjectData projectData, List<String> columnNames, List<Object> values) {
-        columnNames.add("cobertura_number_of_packages");
+        columnNames.add(COBERTURA_NUMBER_OF_PACKAGES);
         values.add(projectData.getPackages().size());
     }
 
     private void addNumberOfSourceFiles(ProjectData projectData, List<String> columnNames, List<Object> values) {
-        columnNames.add("cobertura_number_of_sourcefiles");
+        columnNames.add(COBERTURA_NUMBER_OF_SOURCEFILES);
         values.add(projectData.getNumberOfSourceFiles());
     }
 
     private void addNumberOfClasses(ProjectData projectData, List<String> columnNames, List<Object> values) {
-        columnNames.add("cobertura_number_of_classes");
+        columnNames.add(COBERTURA_NUMBER_OF_CLASSES);
         values.add(projectData.getNumberOfClasses());
     }
 
@@ -305,78 +310,19 @@ public class InfluxDbPublisher extends Notifier {
         return InfluxDBFactory.connect("http://" + server.getHost() + ":" + server.getPort(), server.getUser(), server.getPassword());
     }
 
-    private static final String COBERTURA_REPORT_FILE = "target/cobertura/cobertura.ser";
-    private File coberturaFile = new File(COBERTURA_REPORT_FILE);
 
-    private boolean hasCoberturaReport() {
+    private boolean hasCoberturaReport(AbstractBuild<?, ?> build) {
+        File coberturaFile = getCoberturaFile(build);
         return (coberturaFile != null && coberturaFile.exists() && coberturaFile.canRead());
     }
 
-    private ProjectData getCoberturaProjectData() {
+    private ProjectData getCoberturaProjectData(AbstractBuild<?, ?> build) {
+        File coberturaFile = getCoberturaFile(build);
         return CoverageDataFileHandler.loadCoverageData(coberturaFile);
     }
 
-		/*
-		File dataFile = new File(build.getWorkspace() + "/target/cobertura/cobertura.ser");
-
-		ProjectData projectData = CoverageDataFileHandler.loadCoverageData(dataFile);
-
-		if (projectData == null) {
-			logger.print("Error: Unable to read from data file " + dataFile.getAbsolutePath());
-		}
-
-		double totalLines = 0;
-		double totalLinesCovered = 0;
-		double totalBranches = 0;
-		double totalBranchesCovered = 0;
-
-		Iterator<?> iter = projectData.getClasses().iterator();
-		while (iter.hasNext()) {
-			ClassData classData = (ClassData) iter.next();
-
-			totalBranches += classData.getNumberOfValidBranches();
-			totalBranchesCovered += classData.getNumberOfCoveredBranches();
-
-			totalLines += classData.getNumberOfValidLines();
-			totalLinesCovered += classData.getNumberOfCoveredLines();
-
-			// for next release :
-			// PackageCoverage packageCoverage = getPackageCoverage(classData.getPackageName());
-			// packageCoverage.addBranchCount(classData.getNumberOfValidBranches());
-			// packageCoverage.addBranchCoverage(classData.getNumberOfCoveredBranches());
-			//
-			// packageCoverage.addLineCount(classData.getNumberOfValidLines());
-			// packageCoverage.addLineCoverage(classData.getNumberOfCoveredLines());
-			//
-			// + percentage(classData.getLineCoverageRate()) + "%, branch coverage rate: "
-			// + percentage(classData.getBranchCoverageRate()) + "%");
-
-		}
-
-		for (int i = 0; i < metrics.length; i++) {
-			if (metrics[i].getName().equals(MetricsEnum.COBERTURA_TOTAL_LINE_COVERAGE.name())) {
-				sendMetric(server, metrics[i], percentage(totalLinesCovered / totalLines));
-			}
-			if (metrics[i].getName().equals(MetricsEnum.COBERTURA_TOTAL_BRANCH_COVERAGE.name())) {
-				sendMetric(server, metrics[i], percentage(totalBranchesCovered / totalBranches));
-			}
-		}
-
-
-    Map<String, PackageCoverage> packageCoverageMap = new HashMap();
-
-    private PackageCoverage getPackageCoverage(String packageName) {
-        PackageCoverage packageCoverage = packageCoverageMap.get(packageName);
-        if (packageCoverage == null) {
-            packageCoverage = new PackageCoverage();
-            packageCoverageMap.put(packageName, packageCoverage);
-        }
-        return packageCoverage;
+    private File getCoberturaFile(AbstractBuild<?, ?> build) {
+        return new File(build.getWorkspace() + COBERTURA_REPORT_FILE);
     }
 
-    private String percentage(double coverateRate) {
-        BigDecimal decimal = new BigDecimal(coverateRate * 100);
-        return decimal.setScale(1, BigDecimal.ROUND_DOWN).toString();
-    }
-*/
 }
