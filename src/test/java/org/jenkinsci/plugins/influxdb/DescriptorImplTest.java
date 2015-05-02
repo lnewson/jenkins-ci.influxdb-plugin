@@ -22,6 +22,9 @@ public class DescriptorImplTest {
     public static final String VALID_PORT = "8086";
     public static final String NONPRESENT_PORT = "";
     public static final String INVALID_PORT = "70000";
+    public static final String VALID_DESCRIPTION = "description";
+    public static final String NONPRESENT_DESCRIPTION = "";
+    public static final String TOO_LONG_DESCRIPTION = "too long description";
 
     private DescriptorImpl descriptor;
     private InfluxDbValidator validator;
@@ -80,4 +83,42 @@ public class DescriptorImplTest {
         Assert.assertTrue(result.kind.equals(FormValidation.Kind.ERROR));
     }
 
+    @Test
+    public void checkingDescriptorShouldUseValidatorAndPassOnValidResult () {
+        Mockito.when(validator.isDescriptionPresent(VALID_DESCRIPTION)).thenReturn(true);
+        Mockito.when(validator.isDescriptionTooLong(VALID_DESCRIPTION)).thenReturn(false);
+
+        FormValidation result = descriptor.doCheckDescription(VALID_DESCRIPTION);
+
+        Mockito.verify(validator, Mockito.times(1)).isDescriptionPresent(VALID_DESCRIPTION);
+        Mockito.verify(validator, Mockito.times(1)).isDescriptionTooLong(VALID_DESCRIPTION);
+        Assert.assertTrue(result.kind.equals(FormValidation.Kind.OK));
+
+    }
+
+    @Test
+    public void checkingDescriptorShouldUseValidatorAndFailOnNonExistentDescrition() {
+        Mockito.when(validator.isDescriptionPresent(NONPRESENT_DESCRIPTION)).thenReturn(false);
+        Mockito.when(validator.isDescriptionTooLong(NONPRESENT_DESCRIPTION)).thenReturn(false);
+
+        FormValidation result = descriptor.doCheckDescription(NONPRESENT_DESCRIPTION);
+
+        Mockito.verify(validator, Mockito.times(1)).isDescriptionPresent(NONPRESENT_DESCRIPTION);
+        Mockito.verify(validator, Mockito.times(0)).isDescriptionTooLong(NONPRESENT_DESCRIPTION);
+        Assert.assertTrue(result.kind.equals(FormValidation.Kind.ERROR));
+
+    }
+
+    @Test
+    public void checkingDescriptorShouldUseValidatorAndFailOnTooLongtDescrition() {
+        Mockito.when(validator.isDescriptionPresent(TOO_LONG_DESCRIPTION)).thenReturn(true);
+        Mockito.when(validator.isDescriptionTooLong(TOO_LONG_DESCRIPTION)).thenReturn(true);
+
+        FormValidation result = descriptor.doCheckDescription(TOO_LONG_DESCRIPTION);
+
+        Mockito.verify(validator, Mockito.times(1)).isDescriptionPresent(TOO_LONG_DESCRIPTION);
+        Mockito.verify(validator, Mockito.times(1)).isDescriptionTooLong(TOO_LONG_DESCRIPTION);
+        Assert.assertTrue(result.kind.equals(FormValidation.Kind.ERROR));
+
+    }
 }
