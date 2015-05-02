@@ -1,6 +1,9 @@
 package org.jenkinsci.plugins.influxdb;
 
+import hudson.model.AbstractProject;
+import hudson.model.FreeStyleProject;
 import hudson.util.FormValidation;
+import org.apache.maven.project.MavenProject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +37,21 @@ public class DescriptorImplTest {
         descriptor = new DescriptorImpl(DONT_LOAD_CONFIGURATION);
         validator = Mockito.mock(InfluxDbValidator.class);
         descriptor.setValidator(validator);
+    }
+
+    @Test
+    public void shouldGiveCorrectDisplayName() {
+        Assert.assertEquals(DescriptorImpl.DISPLAY_NAME, descriptor.getDisplayName());
+    }
+
+    @Test
+    public void shouldBeApplicableForAnyProjectType() {
+        Assert.assertTrue( descriptor.isApplicable(AbstractProject.class) );
+    }
+
+    @Test
+    public void validatorShouldBeSameThatWasSet() {
+        Assert.assertTrue(validator == descriptor.getValidator());
     }
 
     @Test

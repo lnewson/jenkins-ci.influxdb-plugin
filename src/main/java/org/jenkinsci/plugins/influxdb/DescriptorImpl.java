@@ -21,6 +21,7 @@ import java.util.Iterator;
  */
 public final class DescriptorImpl extends BuildStepDescriptor<Publisher> implements ModelObject {
 
+	public static final String DISPLAY_NAME = "Publish metrics to InfluxDb Server";
 	private final CopyOnWriteList<Server> servers = new CopyOnWriteList<Server>();
 
 	private InfluxDbValidator validator = new InfluxDbValidator();
@@ -59,7 +60,7 @@ public final class DescriptorImpl extends BuildStepDescriptor<Publisher> impleme
 	 */
 	@Override
 	public String getDisplayName() {
-		return "Publish metrics to InfluxDb Server";
+		return DISPLAY_NAME;
 	}
 
 	/*
@@ -92,21 +93,19 @@ public final class DescriptorImpl extends BuildStepDescriptor<Publisher> impleme
 	@Override
 	public boolean configure(StaplerRequest req, JSONObject formData) {
 		servers.replaceBy(req.bindParametersToList(Server.class, "serverBinding."));
-		//databaseName = formData.optString("databaseName", "");
 		save();
 		return true;
 	}
-
-
 
 	public InfluxDbValidator getValidator() {
 	return validator;
 }
 
 
-public void setValidator(InfluxDbValidator validator) {
+	public void setValidator(InfluxDbValidator validator) {
 	this.validator = validator;
 }
+
 	/**
 	 * @param value
 	 * @return  form validation of description
