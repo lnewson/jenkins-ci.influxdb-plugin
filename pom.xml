@@ -73,8 +73,8 @@
 						<lineRate>0</lineRate>
 						<totalBranchRate>0</totalBranchRate>
 						<totalLineRate>0</totalLineRate>
-						<packageLineRate>50</packageLineRate>
-						<packageBranchRate>80</packageBranchRate>
+						<packageLineRate>10</packageLineRate>
+						<packageBranchRate>10</packageBranchRate>
 					</check>
 					<formats>
 						<format>xml</format>
