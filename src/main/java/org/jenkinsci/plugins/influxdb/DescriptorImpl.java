@@ -33,6 +33,12 @@ public final class DescriptorImpl extends BuildStepDescriptor<Publisher> impleme
 		load();
 	}
 
+	public DescriptorImpl(boolean loadConfiguration) {
+		super(InfluxDbPublisher.class);
+		if(loadConfiguration)
+ 		  load();
+	}
+
 	/**
 	 * @return servers
 	 */
