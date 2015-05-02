@@ -75,5 +75,12 @@ public class InfluxDbValidatorTest {
         Assert.assertTrue(description.length() == 100);
         Assert.assertFalse(validator.isDescriptionTooLong(description));
     }
+
+    @Test
+    public void shouldCheckIsDatabaseNamePresent() {
+        Assert.assertFalse(validator.isDatabaseNamePresent(null));
+        Assert.assertFalse(validator.isDatabaseNamePresent(""));
+        Assert.assertTrue(validator.isDatabaseNamePresent("database"));
+    }
 }
 
