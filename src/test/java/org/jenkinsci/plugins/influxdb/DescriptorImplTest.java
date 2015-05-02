@@ -1,13 +1,14 @@
 package org.jenkinsci.plugins.influxdb;
 
 import hudson.model.AbstractProject;
-import hudson.model.FreeStyleProject;
+import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
-import org.apache.maven.project.MavenProject;
+import net.sf.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.kohsuke.stapler.StaplerRequest;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -31,12 +32,22 @@ public class DescriptorImplTest {
 
     private DescriptorImpl descriptor;
     private InfluxDbValidator validator;
+    private StaplerRequest request;
 
     @Before
     public void setupTestCase() {
-        descriptor = new DescriptorImpl(DONT_LOAD_CONFIGURATION);
+        descriptor = new DescriptorImpl();
         validator = Mockito.mock(InfluxDbValidator.class);
         descriptor.setValidator(validator);
+        request = Mockito.mock(StaplerRequest.class);
+    }
+
+    @Test
+    public void callingNewInstanceShouldCreateNewInstanceOfInfluxDbPublisher() {
+        Publisher publisher1 = descriptor.newInstance(request, null);
+        Publisher publisher2 = descriptor.newInstance(request, null);
+        Assert.assertNotSame(publisher1, publisher2);
+        Assert.assertSame(InfluxDbPublisher.class,  publisher1.getClass());
     }
 
     @Test
@@ -51,7 +62,7 @@ public class DescriptorImplTest {
 
     @Test
     public void validatorShouldBeSameThatWasSet() {
-        Assert.assertTrue(validator == descriptor.getValidator());
+        Assert.assertSame(validator, descriptor.getValidator());
     }
 
     @Test

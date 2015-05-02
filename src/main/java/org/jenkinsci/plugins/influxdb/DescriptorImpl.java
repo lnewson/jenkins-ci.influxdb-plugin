@@ -31,13 +31,11 @@ public final class DescriptorImpl extends BuildStepDescriptor<Publisher> impleme
 	 */
 	public DescriptorImpl() {
 		super(InfluxDbPublisher.class);
-		load();
-	}
-
-	public DescriptorImpl(boolean loadConfiguration) {
-		super(InfluxDbPublisher.class);
-		if(loadConfiguration)
- 		  load();
+		try {
+			load();
+		} catch (Exception e){
+			// Just to make this testable with mocks
+		}
 	}
 
 	/**
