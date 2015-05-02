@@ -86,6 +86,7 @@
 						<goals>
 							<goal>clean</goal>
 							<goal>check</goal>
+							<goal>cobertura</goal>
 						</goals>
 					</execution>
 				</executions>
