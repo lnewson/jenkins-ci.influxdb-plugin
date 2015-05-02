@@ -35,6 +35,7 @@ public class DescriptorImplTest {
 
     @Test
     public void checkingDatabaseNameShouldUseValidatorAndPassWithValidResult() {
+        Mockito.when(validator.isDatabaseNamePresent(VALID_DATABASE_NAME)).thenReturn(true);
         FormValidation result = descriptor.doCheckDatabaseName(VALID_DATABASE_NAME);
         Mockito.verify(validator, Mockito.times(1)).isDatabaseNamePresent(Matchers.eq(VALID_DATABASE_NAME));
         Assert.assertTrue(result.kind.equals(FormValidation.Kind.OK));
