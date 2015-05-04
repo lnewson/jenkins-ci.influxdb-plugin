@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.influxdb;
 
+import hudson.plugins.robot.RobotBuildAction;
 import hudson.tasks.test.AbstractTestResultAction;
 import net.sourceforge.cobertura.coveragedata.ClassData;
 import net.sourceforge.cobertura.coveragedata.CoverageDataFileHandler;
@@ -205,8 +206,39 @@ public class InfluxDbPublisher extends Notifier {
             addClassCoverage(coberturaProjectData, columnNames, values);
         }
 
+        if(hasRobotFrameworkReport(build)) {
+            RobotBuildAction robotBuildAction = build.getAction(RobotBuildAction.class);
+            addFailCount(robotBuildAction,columnNames, values);
+            addCritialPassPercentage(robotBuildAction, columnNames, values);
+            addOveralPassPercentage(robotBuildAction, columnNames, values);
+        }
+
         return builder.columns(columnNames.toArray(new String[columnNames.size()])).values(values.toArray()).build();
 
+    }
+
+    private void addFailCount(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
+        columnNames.add("rf_fail_count");
+        values.add(robotBuildAction.getFailCount());
+    }
+    private void addTotalCount(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
+        columnNames.add("rf_total_count");
+        values.add(robotBuildAction.getTotalCount());
+    }
+
+    private void addCritialPassPercentage(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
+        columnNames.add("rf_critical_pass_percentage");
+        values.add(robotBuildAction.getCriticalPassPercentage());
+    }
+
+    private void addOveralPassPercentage(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
+        columnNames.add("rf_overal_pass_percentage");
+        values.add(robotBuildAction.getOverallPassPercentage());
+    }
+
+    private boolean hasRobotFrameworkReport(AbstractBuild<?, ?> build) {
+        RobotBuildAction robotBuildAction = build.getAction(RobotBuildAction.class);
+        return robotBuildAction != null && robotBuildAction.getResult() != null;
     }
 
     private void addPackageCoverage(ProjectData projectData, List<String> columnNames, List<Object> values) {

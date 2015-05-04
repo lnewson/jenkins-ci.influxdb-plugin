@@ -46,6 +46,20 @@
 		artifacts that we need -->
 	<build>
 		<plugins>
+
+			<plugin>
+				<groupId>org.robotframework</groupId>
+				<artifactId>robotframework-maven-plugin</artifactId>
+				<version>1.4.4</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -140,6 +154,12 @@
 			<artifactId>mockito-all</artifactId>
 			<version>1.8.4</version>
 			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jenkins-ci.plugins</groupId>
+			<artifactId>robot</artifactId>
+			<version>1.6.0</version>
 		</dependency>
 	</dependencies>
 
