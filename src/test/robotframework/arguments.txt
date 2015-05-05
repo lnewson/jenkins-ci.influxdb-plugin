@@ -1,0 +1,6 @@
+--nostatusrc
+--loglevel TRACE
+--outputdir target/robotframework/
+src/test/robotframework/acceptance/
+
+

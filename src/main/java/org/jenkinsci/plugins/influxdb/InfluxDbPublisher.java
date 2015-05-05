@@ -209,8 +209,10 @@ public class InfluxDbPublisher extends Notifier {
         if(hasRobotFrameworkReport(build)) {
             RobotBuildAction robotBuildAction = build.getAction(RobotBuildAction.class);
             addFailCount(robotBuildAction,columnNames, values);
+            addTotalCount(robotBuildAction, columnNames, values);
             addCritialPassPercentage(robotBuildAction, columnNames, values);
             addOveralPassPercentage(robotBuildAction, columnNames, values);
+            addDuration(robotBuildAction, columnNames, values);
         }
 
         return builder.columns(columnNames.toArray(new String[columnNames.size()])).values(values.toArray()).build();
@@ -234,6 +236,11 @@ public class InfluxDbPublisher extends Notifier {
     private void addOveralPassPercentage(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
         columnNames.add("rf_overal_pass_percentage");
         values.add(robotBuildAction.getOverallPassPercentage());
+    }
+
+    private void addDuration(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
+        columnNames.add("rf_duration");
+        robotBuildAction.getResult().getDuration();
     }
 
     private boolean hasRobotFrameworkReport(AbstractBuild<?, ?> build) {
