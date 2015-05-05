@@ -240,7 +240,7 @@ public class InfluxDbPublisher extends Notifier {
 
     private void addDuration(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
         columnNames.add("rf_duration");
-        robotBuildAction.getResult().getDuration();
+        values.add(robotBuildAction.getResult().getDuration());
     }
 
     private boolean hasRobotFrameworkReport(AbstractBuild<?, ?> build) {

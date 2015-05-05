@@ -2,11 +2,19 @@
 Library    Selenium2Library
 
 *** Testcase ***
-Test case 1
+Install Plugin
+   Login to Jenkins
+   Install InfluxDB Plugin
+   [Teardown]                       Close browser
+
+*** Keywords ***
+Login to Jenkins
    Open browser                     ${server}    ${browser}
    Input text                       id=j_username    ${user}
    Input text                       name=j_password    ${password}
    Click element                    id=yui-gen1-button
+
+Install InfluxDB Plugin
    Go to                            ${server}/pluginManager/advanced
    Choose file                      name=name    ${pluginfile}
    Click element                    id=yui-gen3-button
@@ -17,4 +25,3 @@ Test case 1
 #   Wait Until page contains         Please wait while Jenkins is restarting
 #   Sleep    30
 #   Go to                            ${server}
-   [Teardown]                       Close browser
