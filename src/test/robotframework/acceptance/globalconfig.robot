@@ -1,11 +1,17 @@
 *** Settings ***
+Test setup    Login to Jenkins
+Test teardown   Close browser
+
 Library    Selenium2Library
 
 *** Testcase ***
 Install Plugin
-   Login to Jenkins
    Install InfluxDB Plugin
-   [Teardown]                       Close browser
+
+InfluxDB Server configuration should be possible in Jenkins Global Configuration
+   Go to global configuration
+   Page should contain              InfluxDb Server
+
 
 *** Keywords ***
 Login to Jenkins
@@ -25,3 +31,6 @@ Install InfluxDB Plugin
 #   Wait Until page contains         Please wait while Jenkins is restarting
 #   Sleep    30
 #   Go to                            ${server}
+
+Go to global configuration
+    Go to    http://jenkins.microop.com/configure
