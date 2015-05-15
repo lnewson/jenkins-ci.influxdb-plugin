@@ -18,6 +18,9 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+import org.jenkinsci.plugins.influxdb.generators.CoberturaSerieGenerator;
+import org.jenkinsci.plugins.influxdb.generators.RobotFrameworkSerieGenerator;
+import org.jenkinsci.plugins.influxdb.generators.SerieGenerator;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,15 +49,7 @@ public class InfluxDbPublisher extends Notifier {
     public static final String TESTS_FAILED = "tests_failed";
     public static final String TESTS_SKIPPED = "tests_skipped";
     public static final String TESTS_TOTAL = "tests_total";
-    public static final String COBERTURA_PACKAGE_COVERAGE_RATE = "cobertura_package_coverage_rate";
-    public static final String COBERTURA_CLASS_COVERAGE_RATE = "cobertura_class_coverage_rate";
-    public static final String COBERTURA_LINE_COVERAGE_RATE = "cobertura_line_coverage_rate";
-    public static final String COBERTURA_BRANCH_COVERAGE_RATE = "cobertura_branch_coverage_rate";
-    public static final String COBERTURA_NUMBER_OF_PACKAGES = "cobertura_number_of_packages";
-    public static final String COBERTURA_NUMBER_OF_SOURCEFILES = "cobertura_number_of_sourcefiles";
-    public static final String COBERTURA_NUMBER_OF_CLASSES = "cobertura_number_of_classes";
 
-    private static final String COBERTURA_REPORT_FILE = "/target/cobertura/cobertura.ser";
 
     private String selectedIp;
     private String serieName;
@@ -174,6 +169,16 @@ public class InfluxDbPublisher extends Notifier {
         InfluxDB influxDB = openInfluxDb(server);
         influxDB.write(server.getDatabaseName(), TimeUnit.MILLISECONDS, metricSerie);
 
+        CoberturaSerieGenerator cbGenerator = new CoberturaSerieGenerator(build);
+        if(cbGenerator.hasReport()) {
+            influxDB.write(server.getDatabaseName(), TimeUnit.MILLISECONDS, cbGenerator.generate());
+        }
+
+        SerieGenerator rfGenerator = new RobotFrameworkSerieGenerator(build);
+        if(rfGenerator.hasReport()) {
+            influxDB.write(server.getDatabaseName(), TimeUnit.MILLISECONDS, rfGenerator.generate());
+        }
+
         return true;
     }
 
@@ -195,111 +200,11 @@ public class InfluxDbPublisher extends Notifier {
             addTestsTotal(build, columnNames, values);
         }
 
-        if(hasCoberturaReport(build)) {
-            ProjectData coberturaProjectData = getCoberturaProjectData(build);
-            addNumberOfPackages(coberturaProjectData, columnNames, values);
-            addNumberOfSourceFiles(coberturaProjectData, columnNames, values);
-            addNumberOfClasses(coberturaProjectData, columnNames, values);
-            addBranchCoverageRate(coberturaProjectData, columnNames, values);
-            addLineCoverageRate(coberturaProjectData, columnNames, values);
-            addPackageCoverage(coberturaProjectData, columnNames, values);
-            addClassCoverage(coberturaProjectData, columnNames, values);
-        }
-
-        if(hasRobotFrameworkReport(build)) {
-            RobotBuildAction robotBuildAction = build.getAction(RobotBuildAction.class);
-            addFailCount(robotBuildAction,columnNames, values);
-            addTotalCount(robotBuildAction, columnNames, values);
-            addCritialPassPercentage(robotBuildAction, columnNames, values);
-            addOveralPassPercentage(robotBuildAction, columnNames, values);
-            addDuration(robotBuildAction, columnNames, values);
-        }
-
         return builder.columns(columnNames.toArray(new String[columnNames.size()])).values(values.toArray()).build();
 
     }
 
-    private void addFailCount(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
-        columnNames.add("rf_fail_count");
-        values.add(robotBuildAction.getFailCount());
-    }
-    private void addTotalCount(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
-        columnNames.add("rf_total_count");
-        values.add(robotBuildAction.getTotalCount());
-    }
 
-    private void addCritialPassPercentage(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
-        columnNames.add("rf_critical_pass_percentage");
-        values.add(robotBuildAction.getCriticalPassPercentage());
-    }
-
-    private void addOveralPassPercentage(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
-        columnNames.add("rf_overal_pass_percentage");
-        values.add(robotBuildAction.getOverallPassPercentage());
-    }
-
-    private void addDuration(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
-        columnNames.add("rf_duration");
-        values.add(robotBuildAction.getResult().getDuration());
-    }
-
-    private boolean hasRobotFrameworkReport(AbstractBuild<?, ?> build) {
-        RobotBuildAction robotBuildAction = build.getAction(RobotBuildAction.class);
-        return robotBuildAction != null && robotBuildAction.getResult() != null;
-    }
-
-    private void addPackageCoverage(ProjectData projectData, List<String> columnNames, List<Object> values) {
-        double totalPacakges = projectData.getPackages().size();
-        double packagesCovered = 0;
-        for(Object nextPackage : projectData.getPackages()) {
-            PackageData packageData = (PackageData) nextPackage;
-            if(packageData.getLineCoverageRate() > 0)
-                packagesCovered++;
-        }
-        double packageCoverage = packagesCovered / totalPacakges;
-
-        columnNames.add(COBERTURA_PACKAGE_COVERAGE_RATE);
-        values.add(packageCoverage*100d);
-    }
-
-    private void addClassCoverage(ProjectData projectData, List<String> columnNames, List<Object> values) {
-        double totalClasses = projectData.getNumberOfClasses();
-        double classesCovered = 0;
-        for(Object nextClass : projectData.getClasses()) {
-            ClassData classData = (ClassData) nextClass;
-            if(classData.getLineCoverageRate() > 0)
-                classesCovered++;
-        }
-        double classCoverage = classesCovered / totalClasses;
-
-        columnNames.add(COBERTURA_CLASS_COVERAGE_RATE);
-        values.add(classCoverage*100d);
-    }
-
-    private void addLineCoverageRate(ProjectData projectData, List<String> columnNames, List<Object> values) {
-        columnNames.add(COBERTURA_LINE_COVERAGE_RATE);
-        values.add(projectData.getLineCoverageRate()*100d);
-    }
-
-    private void addBranchCoverageRate(ProjectData projectData, List<String> columnNames, List<Object> values) {
-        columnNames.add(COBERTURA_BRANCH_COVERAGE_RATE);
-        values.add(projectData.getBranchCoverageRate()*100d);
-    }
-
-    private void addNumberOfPackages(ProjectData projectData, List<String> columnNames, List<Object> values) {
-        columnNames.add(COBERTURA_NUMBER_OF_PACKAGES);
-        values.add(projectData.getPackages().size());
-    }
-
-    private void addNumberOfSourceFiles(ProjectData projectData, List<String> columnNames, List<Object> values) {
-        columnNames.add(COBERTURA_NUMBER_OF_SOURCEFILES);
-        values.add(projectData.getNumberOfSourceFiles());
-    }
-
-    private void addNumberOfClasses(ProjectData projectData, List<String> columnNames, List<Object> values) {
-        columnNames.add(COBERTURA_NUMBER_OF_CLASSES);
-        values.add(projectData.getNumberOfClasses());
-    }
 
     private void addProjectName(AbstractBuild<?, ?> build, List<String> columnNames, List<Object> values) {
         columnNames.add(PROJECT_NAME);
@@ -350,18 +255,5 @@ public class InfluxDbPublisher extends Notifier {
     }
 
 
-    private boolean hasCoberturaReport(AbstractBuild<?, ?> build) {
-        File coberturaFile = getCoberturaFile(build);
-        return (coberturaFile != null && coberturaFile.exists() && coberturaFile.canRead());
-    }
-
-    private ProjectData getCoberturaProjectData(AbstractBuild<?, ?> build) {
-        File coberturaFile = getCoberturaFile(build);
-        return CoverageDataFileHandler.loadCoverageData(coberturaFile);
-    }
-
-    private File getCoberturaFile(AbstractBuild<?, ?> build) {
-        return new File(build.getWorkspace() + COBERTURA_REPORT_FILE);
-    }
 
 }
