@@ -2,20 +2,19 @@ package org.jenkinsci.plugins.influxdb.generators;
 
 import hudson.model.AbstractBuild;
 import hudson.plugins.robot.RobotBuildAction;
+import hudson.plugins.robot.model.RobotCaseResult;
 import hudson.plugins.robot.model.RobotResult;
 import hudson.plugins.robot.model.RobotSuiteResult;
 import org.influxdb.dto.Serie;
 
-import java.util.ArrayList;
+import java.awt.*;
+import java.util.*;
 import java.util.List;
 
 /**
  * Created by jrajala on 15.5.2015.
  */
 public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
-
-    public static final String RF_OVERALL_SERIE = "rf.overall";
-    public static final String RF_SUITE_SERIE = "rf.suite";
 
     public static final String RF_FAILED = "rf_failed";
     public static final String RF_PASSED = "rf_passed";
@@ -30,9 +29,11 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
     public static final String RF_TESTCASES = "rf_testcases";
 
     private final AbstractBuild<?, ?> build;
+    private final Map<String, RobotTagResult> tagResults;
 
     public RobotFrameworkSerieGenerator(AbstractBuild<?, ?> build) {
         this.build = build;
+        tagResults = new Hashtable<String, RobotTagResult>();
     }
 
     public boolean hasReport() {
@@ -46,7 +47,7 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         List<Serie> seriesList = new ArrayList<Serie>();
 
         seriesList.add(generateOverviewSerie(robotBuildAction));
-        seriesList.addAll(generateSuiteSeries(robotBuildAction.getResult()));
+        seriesList.addAll(generateSubSeries(robotBuildAction.getResult()));
 
         return seriesList.toArray(new Serie[seriesList.size()]);
     }
@@ -72,7 +73,7 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         addDuration(robotBuildAction, columns, values);
         addSuites(robotBuildAction, columns, values);
 
-        Serie.Builder builder = new Serie.Builder(RF_OVERALL_SERIE);
+        Serie.Builder builder = new Serie.Builder(getSeriePrefix());
         return builder.columns(columns.toArray(new String[columns.size()])).values(values.toArray()).build();
 
     }
@@ -126,12 +127,104 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
     }
 
 
-    private List<Serie> generateSuiteSeries(RobotResult robotResult) {
-        List<Serie> suiteSeries = new ArrayList<Serie>();
+    private List<Serie> generateSubSeries(RobotResult robotResult) {
+        List<Serie> subSeries = new ArrayList<Serie>();
         for(RobotSuiteResult suiteResult : robotResult.getAllSuites()) {
-            suiteSeries.add(generateSuiteSerie(suiteResult));
+            subSeries.add(generateSuiteSerie(suiteResult));
+
+            for(RobotCaseResult caseResult : suiteResult.getAllCases()) {
+                subSeries.add(generateCaseSerie(caseResult));
+            }
+
         }
-        return suiteSeries;
+
+        for(Map.Entry<String, RobotTagResult> entry : tagResults.entrySet()) {
+            subSeries.add(generateTagSerie(entry.getValue()));
+        }
+        return subSeries;
+    }
+
+    private Serie generateCaseSerie(RobotCaseResult caseResult) {
+        List<String> columns = new ArrayList<String>();
+        List<Object> values = new ArrayList<Object>();
+
+        columns.add(RF_CRITICAL_FAILED);
+        values.add(caseResult.getCriticalFailed());
+
+        columns.add(RF_CRITICAL_PASSED);
+        values.add(caseResult.getCriticalPassed());
+
+        columns.add(RF_FAILED);
+        values.add(caseResult.getFailed());
+
+        columns.add(RF_PASSED);
+        values.add(caseResult.getPassed());
+
+        columns.add(RF_DURATION);
+        values.add(caseResult.getDuration());
+
+        Serie.Builder builder = new Serie.Builder(getCaseSerieName(caseResult));
+
+        for(String tag : caseResult.getTags()) {
+            markTagResult(tag, caseResult);
+        }
+
+        return builder.columns(columns.toArray(new String[columns.size()])).values(values.toArray()).build();
+    }
+
+    private final class RobotTagResult {
+        protected final String name;
+        protected RobotTagResult(String name) {
+            this.name = name;
+        }
+        protected final List<String> testCases = new ArrayList<String>();
+        protected int failed = 0;
+        protected int passed = 0;
+        protected int criticalFailed = 0;
+        protected int criticalPassed = 0;
+        protected long duration = 0;
+    }
+
+
+    private void markTagResult(String tag, RobotCaseResult caseResult) {
+        if(tagResults.get(tag) == null)
+            tagResults.put(tag, new RobotTagResult(tag));
+
+        RobotTagResult tagResult = tagResults.get(tag);
+        if(!tagResult.testCases.contains(caseResult.getDuplicateSafeName())) {
+            tagResult.failed += caseResult.getFailed();
+            tagResult.passed += caseResult.getPassed();
+            tagResult.criticalFailed += caseResult.getCriticalFailed();
+            tagResult.criticalPassed += caseResult.getCriticalPassed();
+            tagResult.duration += caseResult.getDuration();
+            tagResult.testCases.add(caseResult.getDuplicateSafeName());
+        }
+
+
+    }
+
+    private Serie generateTagSerie(RobotTagResult tagResult) {
+        List<String> columns = new ArrayList<String>();
+        List<Object> values = new ArrayList<Object>();
+
+        columns.add(RF_CRITICAL_FAILED);
+        values.add(tagResult.criticalFailed);
+
+        columns.add(RF_CRITICAL_PASSED);
+        values.add(tagResult.criticalPassed);
+
+        columns.add(RF_FAILED);
+        values.add(tagResult.failed);
+
+        columns.add(RF_PASSED);
+        values.add(tagResult.passed);
+
+        columns.add(RF_DURATION);
+        values.add(tagResult.duration);
+
+        Serie.Builder builder = new Serie.Builder(getTagSerieName(tagResult));
+
+        return builder.columns(columns.toArray(new String[columns.size()])).values(values.toArray()).build();
     }
 
     private Serie generateSuiteSerie(RobotSuiteResult suiteResult) {
@@ -162,7 +255,40 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         columns.add(RF_TOTAL);
         values.add(suiteResult.getTotal());
 
-        Serie.Builder builder = new Serie.Builder(RF_SUITE_SERIE+"."+suiteResult.getDuplicateSafeName());
+        columns.add(RF_DURATION);
+        values.add(suiteResult.getDuration());
+
+        Serie.Builder builder = new Serie.Builder(getSuiteSerieName(suiteResult));
         return builder.columns(columns.toArray(new String[columns.size()])).values(values.toArray()).build();
+    }
+
+
+
+    private String getTagSerieName(RobotTagResult tagResult) {
+        return getTagSeriePrefix()+"."+tagResult.name;
+    }
+
+    private String getCaseSerieName(RobotCaseResult caseResult) {
+        return getCaseSeriePrefix()+"."+caseResult.getDuplicateSafeName();
+    }
+
+    private String getCaseSeriePrefix() {
+        return getSeriePrefix()+".testcase";
+    }
+
+    private String getSuiteSerieName(RobotSuiteResult suiteResult) {
+        return getSuiteSeriePrefix()+"."+suiteResult.getDuplicateSafeName();
+    }
+
+    private String getTagSeriePrefix() {
+        return getSeriePrefix()+".tag";
+    }
+
+    private String getSuiteSeriePrefix() {
+        return getSeriePrefix()+".suite";
+    }
+
+    private String getSeriePrefix() {
+        return build.getProject().getName()+".rf";
     }
 }

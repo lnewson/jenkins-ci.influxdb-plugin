@@ -55,7 +55,7 @@ public class CoberturaSerieGenerator extends AbstractSerieGenerator {
         addPackageCoverage(coberturaProjectData, columns, values);
         addClassCoverage(coberturaProjectData, columns, values);
 
-        Serie.Builder builder = new Serie.Builder("CoberturaResults");
+        Serie.Builder builder = new Serie.Builder(getSerieName());
 
         return new Serie[] {builder.columns(columns.toArray(new String[columns.size()])).values(values.toArray()).build() };
 
@@ -112,6 +112,10 @@ public class CoberturaSerieGenerator extends AbstractSerieGenerator {
     private void addNumberOfClasses(ProjectData projectData, List<String> columnNames, List<Object> values) {
         columnNames.add(COBERTURA_NUMBER_OF_CLASSES);
         values.add(projectData.getNumberOfClasses());
+    }
+
+    private String getSerieName() {
+        return build.getProject().getName()+".cobertura";
     }
 
 
