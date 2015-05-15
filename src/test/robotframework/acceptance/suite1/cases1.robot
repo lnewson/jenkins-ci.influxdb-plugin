@@ -1,16 +1,20 @@
 *** Test Cases ***
 Suite 1 - Cases 1 - Case 1
-   Sleep 1
+   [Tags]   Suite 1    Case 1    RC
+   Sleep    1
    Pass execution
 
 Suite 1 - Cases 1 - Case 2
-  Sleep 1
-  Pass execution
+   [Tags]   Suite 1    Case 2    RC
+   Sleep    1
+   Pass execution
 
 Suite 1 - Cases 1 - Case 3
-   Sleep 1
+   [Tags]   Suite 1    Case 3    RC
+   Sleep    1
    Pass execution
 
 Suite 1 - Cases 1 - Case 4
-   Sleep 1
+   [Tags]   Suite 1    Case 4    RC
+   Sleep     1
    Pass execution
