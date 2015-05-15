@@ -4,7 +4,6 @@ import hudson.model.AbstractBuild;
 import hudson.plugins.robot.RobotBuildAction;
 import hudson.plugins.robot.model.RobotResult;
 import hudson.plugins.robot.model.RobotSuiteResult;
-import hudson.tasks.junit.SuiteResult;
 import org.influxdb.dto.Serie;
 
 import java.util.ArrayList;
@@ -15,6 +14,19 @@ import java.util.List;
  */
 public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
 
+    public static final String RF_OVERALL_FAILED = "rf_overall_failed";
+    public static final String RF_OVERALL_PASSED = "rf_overall_passed";
+    public static final String RF_OVERALL_TOTAL = "rf_overall_total";
+    public static final String RF_CRITICAL_FAILED = "rf_critical_failed";
+    public static final String RF_CRITICAL_PASSED = "rf_critical_passed";
+    public static final String RF_CRITICAL_TOTAL = "rf_critical_total";
+    public static final String RF_CRITICAL_PASS_PERCENTAGE = "rf_critical_pass_percentage";
+    public static final String RF_OVERALL_PASS_PERCENTAGE = "rf_overall_pass_percentage";
+    public static final String RF_DURATION = "rf_duration";
+    public static final String RF_SUITES = "rf_suites";
+    public static final String RF_TESTCASES = "rf_testcases";
+    public static final String RF_SUITE_NAME = "rf_suite_name" +
+            "";
     private final AbstractBuild<?, ?> build;
 
     public RobotFrameworkSerieGenerator(AbstractBuild<?, ?> build) {
@@ -64,50 +76,50 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
     }
 
     private void addOverallFailCount(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
-        columnNames.add("rf_overall_failed");
+        columnNames.add(RF_OVERALL_FAILED);
         values.add(robotBuildAction.getResult().getOverallFailed());
     }
     private void addOverallPassedCount(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
-        columnNames.add("rf_overall_passed");
+        columnNames.add(RF_OVERALL_PASSED);
         values.add(robotBuildAction.getResult().getOverallPassed());
     }
     private void addOverallTotalCount(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
-        columnNames.add("rf_overall_total");
+        columnNames.add(RF_OVERALL_TOTAL);
         values.add(robotBuildAction.getResult().getOverallTotal());
     }
 
     private void addCriticalFailCount(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
-        columnNames.add("rf_critical_fail");
+        columnNames.add(RF_CRITICAL_FAILED);
         values.add(robotBuildAction.getResult().getCriticalFailed());
     }
 
     private void addCriticalPassedCount(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
-        columnNames.add("rf_critical_passed");
+        columnNames.add(RF_CRITICAL_PASSED);
         values.add(robotBuildAction.getResult().getCriticalPassed());
     }
 
     private void addCriticalTotalCount(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
-        columnNames.add("rf_critical_total");
+        columnNames.add(RF_CRITICAL_TOTAL);
         values.add(robotBuildAction.getResult().getCriticalTotal());
     }
 
     private void addOverallCritialPassPercentage(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
-        columnNames.add("rf_critical_pass_percentage");
+        columnNames.add(RF_CRITICAL_PASS_PERCENTAGE);
         values.add(robotBuildAction.getCriticalPassPercentage());
     }
 
     private void addOverallPassPercentage(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
-        columnNames.add("rf_overall_pass_percentage");
+        columnNames.add(RF_OVERALL_PASS_PERCENTAGE);
         values.add(robotBuildAction.getOverallPassPercentage());
     }
 
     private void addDuration(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
-        columnNames.add("rf_duration");
+        columnNames.add(RF_DURATION);
         values.add(robotBuildAction.getResult().getDuration());
     }
 
     private void addSuites(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
-        columnNames.add("rf_suites");
+        columnNames.add(RF_SUITES);
         values.add(robotBuildAction.getResult().getAllSuites().size());
     }
 
@@ -127,11 +139,29 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         addJenkinsBuildNumber(build, columns, values);
         addJenkinsProjectName(build, columns, values);
 
-        columns.add("rf_testcases");
+        columns.add(RF_TESTCASES);
         values.add(suiteResult.getAllCases().size());
 
-        columns.add("rf_suite");
+        columns.add(RF_SUITE_NAME);
         values.add(suiteResult.getDuplicateSafeName());
+
+        columns.add(RF_CRITICAL_FAILED);
+        values.add(suiteResult.getCriticalFailed());
+
+        columns.add(RF_CRITICAL_PASSED);
+        values.add(suiteResult.getCriticalPassed());
+
+        columns.add(RF_CRITICAL_TOTAL);
+        values.add(suiteResult.getCriticalTotal());
+
+        columns.add(RF_OVERALL_FAILED);
+        values.add(suiteResult.getFailed());
+
+        columns.add(RF_OVERALL_PASSED);
+        values.add(suiteResult.getPassed());
+
+        columns.add(RF_OVERALL_TOTAL);
+        values.add(suiteResult.getTotal());
 
         Serie.Builder builder = new Serie.Builder("RobotFrameworkResults");
         return builder.columns(columns.toArray(new String[columns.size()])).values(values.toArray()).build();
