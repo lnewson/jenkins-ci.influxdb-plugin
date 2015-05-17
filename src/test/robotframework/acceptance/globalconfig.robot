@@ -6,9 +6,31 @@ Library    Selenium2Library
 
 *** Testcase ***
 Install Plugin
+   [Tags]                           RELEASED
    Install InfluxDB Plugin
 
-InfluxDB Server configuration should be possible in Jenkins Global Configuration
+User can add new InfluxDB Server in global configuration
+   [Tags]                           WIP
+   Go to global configuration
+   Wait until page contains         InfluxDb Server
+
+User can change setting of InfluxDB Server in global configuration
+   [Tags]                           WIP
+   Go to global configuration
+   Wait until page contains         InfluxDb Server
+
+User can delete existing InfluxDB Server in global configuration
+   [Tags]                           WIP
+   Go to global configuration
+   Wait until page contains         InfluxDb Server
+
+User can add InfluxDB publisher as post build action
+   [Tags]                           WIP
+   Go to global configuration
+   Wait until page contains         InfluxDb Server
+
+User can select which InfluxDB server is used for reportint metrics
+   [Tags]                           WIP
    Go to global configuration
    Wait until page contains         InfluxDb Server
 
