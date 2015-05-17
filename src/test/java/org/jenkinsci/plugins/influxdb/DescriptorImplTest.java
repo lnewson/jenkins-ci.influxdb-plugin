@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.jvnet.hudson.test.MockQueueItemAuthenticator;
 import org.kohsuke.stapler.StaplerRequest;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
@@ -29,6 +30,8 @@ public class DescriptorImplTest {
     public static final String VALID_DESCRIPTION = "description";
     public static final String NONPRESENT_DESCRIPTION = "";
     public static final String TOO_LONG_DESCRIPTION = "too long description";
+    public static final String VALID_HOSTNAME = "host";
+    public static final String INVALID_HOSTNAME = "";
 
     private DescriptorImpl descriptor;
     private InfluxDbValidator validator;
@@ -57,7 +60,7 @@ public class DescriptorImplTest {
 
     @Test
     public void shouldBeApplicableForAnyProjectType() {
-        Assert.assertTrue( descriptor.isApplicable(AbstractProject.class) );
+        Assert.assertTrue(descriptor.isApplicable(AbstractProject.class));
     }
 
     @Test
@@ -150,4 +153,26 @@ public class DescriptorImplTest {
         Assert.assertTrue(result.kind.equals(FormValidation.Kind.ERROR));
 
     }
+
+    @Test
+    public void checkingHostShouldUseValidatorAndPassOnValidResult() {
+        Mockito.when(validator.isHostPresent(VALID_HOSTNAME)).thenReturn(true);
+
+        FormValidation result = descriptor.doCheckHost(VALID_HOSTNAME);
+
+        Mockito.verify(validator, Mockito.times(1)).isHostPresent(VALID_HOSTNAME);
+        Assert.assertTrue(result.kind.equals(FormValidation.Kind.OK));
+    }
+
+    @Test
+    public void chekcingHostShouldUseValidatorAndFailOnInvalidResult() {
+        Mockito.when(validator.isHostPresent(INVALID_HOSTNAME)).thenReturn(false);
+
+        FormValidation result = descriptor.doCheckHost(INVALID_HOSTNAME);
+
+        Mockito.verify(validator, Mockito.times(1)).isHostPresent(INVALID_HOSTNAME);
+        Assert.assertTrue(result.kind.equals(FormValidation.Kind.ERROR));
+
+    }
+
 }

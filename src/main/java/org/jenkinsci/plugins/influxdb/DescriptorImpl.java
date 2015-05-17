@@ -121,6 +121,18 @@ public final class DescriptorImpl extends BuildStepDescriptor<Publisher> impleme
 
 	/**
 	 * @param value
+	 * @return  form validation of description
+	 */
+	public FormValidation doCheckHost(@QueryParameter final String value) {
+		if (!validator.isHostPresent(value)) {
+			return FormValidation.error("Host is mandatory");
+		}
+
+		return FormValidation.ok("Host is correctly configured");
+	}
+
+	/**
+	 * @param value
 	 * @return  form validation of port.
 	 */
 	public FormValidation doCheckPort(@QueryParameter final String value) {

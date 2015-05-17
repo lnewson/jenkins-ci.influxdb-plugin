@@ -1,14 +1,7 @@
 package org.jenkinsci.plugins.influxdb;
 
-import hudson.plugins.robot.RobotBuildAction;
-import hudson.tasks.test.AbstractTestResultAction;
-import net.sourceforge.cobertura.coveragedata.ClassData;
-import net.sourceforge.cobertura.coveragedata.CoverageDataFileHandler;
-import net.sourceforge.cobertura.coveragedata.PackageData;
-import net.sourceforge.cobertura.coveragedata.ProjectData;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
-import org.influxdb.dto.Serie;
 
 import hudson.Extension;
 import hudson.Launcher;
@@ -23,10 +16,7 @@ import org.jenkinsci.plugins.influxdb.generators.JenkinsBaseSerieGenerator;
 import org.jenkinsci.plugins.influxdb.generators.RobotFrameworkSerieGenerator;
 import org.jenkinsci.plugins.influxdb.generators.SerieGenerator;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
@@ -42,35 +32,19 @@ public class InfluxDbPublisher extends Notifier {
     @Extension
     public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
-
-
-    private String selectedIp;
-    private String serieName;
-
-    private String protocol;
+    private String selectedServer;
 
 
     public InfluxDbPublisher() {
     }
 
-    public InfluxDbPublisher(String ip, String metric, String protocol) {
-        this.selectedIp = ip;
-        this.protocol = protocol;
-        System.out.println("IP: " + ip);
-        System.out.println("Protocol: " + protocol);
-
+    public InfluxDbPublisher(String server) {
+        this.selectedServer = server;
+        System.out.println("Selected Server: " + server);
     }
 
-    public String getProtocol() {
-		return protocol;
-	}
-
-	public void setProtocol(String protocol) {
-		this.protocol = protocol;
-	}
-
-    public String getSelectedIp() {
-        String ipTemp = selectedIp;
+    public String getSelectedServer() {
+        String ipTemp = selectedServer;
         if (ipTemp == null) {
             Server[] servers = DESCRIPTOR.getServers();
             if (servers.length > 0) {
@@ -80,25 +54,17 @@ public class InfluxDbPublisher extends Notifier {
         return ipTemp;
     }
 
-    public String getSerieName() {
-        return serieName;
-    }
-
-    public void setSerieName(String serieName) {
-        this.serieName = serieName;
-    }
-
-    public void setSelectedIp(String ip) {
-        this.selectedIp = ip;
+    public void setSelectedServer(String server) {
+        this.selectedServer = server;
     }
 
     public Server getServer() {
         Server[] servers = DESCRIPTOR.getServers();
-        if (selectedIp == null && servers.length > 0) {
+        if (selectedServer == null && servers.length > 0) {
             return servers[0];
         }
         for (Server server : servers) {
-            if (server.getHost().equals(selectedIp)) {
+            if (server.getHost().equals(selectedServer)) {
                 return server;
             }
         }
@@ -107,7 +73,7 @@ public class InfluxDbPublisher extends Notifier {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * hudson.tasks.BuildStepCompatibilityLayer#prebuild(hudson.model.AbstractBuild
      * , hudson.model.BuildListener)

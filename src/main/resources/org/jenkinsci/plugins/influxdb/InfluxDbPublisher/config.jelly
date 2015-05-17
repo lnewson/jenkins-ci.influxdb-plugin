@@ -4,16 +4,11 @@
   <j:set var="helpURL" value="/plugin/influxdb/help/config" />
   
   <f:entry title="${%influxdb_server_title}" help="${helpURL}/choose-influxdb-server.html">
-    <select class="setting-input" name="publisherBinding.selectedIp" >
+    <select class="setting-input" name="publisherBinding.selectedServer" >
       <j:forEach var="currentServer" items="${descriptor.servers}">
-        <f:option selected="${currentServer.host==instance.selectedIp}" value="${currentServer.host}" >${currentServer.description}</f:option>
+        <f:option selected="${currentServer.host==instance.selectedServer}" value="${currentServer.host}" >${currentServer.description}</f:option>
       </j:forEach>
     </select>
   </f:entry>
-
-  <f:entry title="${%choose_influxdb_serie_name}" help="${helpURL}/choose-influxdb-serie-name.html">
-    <input class="setting-input" name="publisherBinding.serieName" type="text" value="${instance.serieName}" />
-  </f:entry>
-
 
 </j:jelly>

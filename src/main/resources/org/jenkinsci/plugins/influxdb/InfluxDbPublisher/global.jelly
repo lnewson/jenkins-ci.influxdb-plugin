@@ -34,7 +34,7 @@
           </f:entry>
 
           <f:entry title="${%influxdb_servers_adding_password}" help="${helpURL}/influxdb_servers_adding_password.html" field="password">
-            <f:textbox name="serverBinding.password"  value="${currentServer.password}"/>
+            <f:password name="serverBinding.password"  value="${currentServer.password}"/>
           </f:entry>
 
           <f:entry title="${%influxdb_database_name}" help="${helpURL}/influxdb_database_name.html" field="databaseName" >
