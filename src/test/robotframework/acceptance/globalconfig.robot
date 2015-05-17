@@ -10,7 +10,7 @@ Install Plugin
 
 InfluxDB Server configuration should be possible in Jenkins Global Configuration
    Go to global configuration
-   Page should contain              InfluxDb Server
+   Wait until page contains         InfluxDb Server
 
 
 *** Keywords ***
@@ -25,12 +25,12 @@ Install InfluxDB Plugin
    Choose file                      name=name    ${pluginfile}
    Click element                    id=yui-gen3-button
    Wait Until Element Is Visible    id=scheduleRestartCheckbox
-#   Select checkbox                  id=scheduleRestartCheckbox
-#   Sleep                            5
-#   Go to                            ${server}
-#   Wait Until page contains         Please wait while Jenkins is restarting
-#   Sleep    30
-#   Go to                            ${server}
+   Select checkbox                  id=scheduleRestartCheckbox
+   Sleep                            5
+   Go to                            ${server}
+   Wait Until page contains         Please wait while Jenkins is restarting
+   Sleep    30
+   Go to                            ${server}
 
 Go to global configuration
-    Go to    http://jenkins.microop.com/configure
+    Go to                           ${server}/configure
