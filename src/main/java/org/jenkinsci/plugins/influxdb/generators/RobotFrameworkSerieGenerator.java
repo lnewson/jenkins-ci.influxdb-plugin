@@ -213,11 +213,17 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         columns.add(RF_CRITICAL_PASSED);
         values.add(tagResult.criticalPassed);
 
+        columns.add(RF_CRITICAL_TOTAL);
+        values.add(tagResult.criticalPassed + tagResult.criticalFailed);
+
         columns.add(RF_FAILED);
         values.add(tagResult.failed);
 
         columns.add(RF_PASSED);
         values.add(tagResult.passed);
+
+        columns.add(RF_TOTAL);
+        values.add(tagResult.passed + tagResult.failed);
 
         columns.add(RF_DURATION);
         values.add(tagResult.duration);
