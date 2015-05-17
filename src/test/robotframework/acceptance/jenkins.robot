@@ -1,3 +1,6 @@
+*** Settings ***
+Library                             Selenium2Library
+
 *** Keywords ***
 Login to Jenkins
    Open browser                     ${server}    ${browser}

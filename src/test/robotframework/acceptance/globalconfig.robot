@@ -4,8 +4,6 @@ Test teardown     Close browser
 Force tags        EPIC_GLOBAL_CONFIG
 Resource          jenkins.robot
 
-Library    Selenium2Library
-
 *** Testcase ***
 Install Plugin
    [Tags]                           RELEASED
