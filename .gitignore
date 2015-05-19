@@ -4,3 +4,4 @@ target/
 /work
 .idea
 *.iml
+ghostdriver.log
