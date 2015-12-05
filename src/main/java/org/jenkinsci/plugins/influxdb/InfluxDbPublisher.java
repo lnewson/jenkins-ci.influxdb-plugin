@@ -11,12 +11,15 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+import org.influxdb.dto.BatchPoints;
+import org.influxdb.dto.Point;
 import org.jenkinsci.plugins.influxdb.generators.CoberturaSerieGenerator;
 import org.jenkinsci.plugins.influxdb.generators.JenkinsBaseSerieGenerator;
 import org.jenkinsci.plugins.influxdb.generators.RobotFrameworkSerieGenerator;
 import org.jenkinsci.plugins.influxdb.generators.SerieGenerator;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
@@ -122,21 +125,32 @@ public class InfluxDbPublisher extends Notifier {
      */
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-
         Server server = getServer();
         InfluxDB influxDB = openInfluxDb(server);
 
         JenkinsBaseSerieGenerator jGenerator = new JenkinsBaseSerieGenerator(build);
-        influxDB.write(server.getDatabaseName(), TimeUnit.MILLISECONDS, jGenerator.generate());
+        BatchPoints jenkinsBatchPoints = BatchPoints.database(server.getDatabaseName())
+                .retentionPolicy("default")
+                .points(jGenerator.generate()).build();
+        influxDB.write(jenkinsBatchPoints);
 
         CoberturaSerieGenerator cbGenerator = new CoberturaSerieGenerator(build);
         if(cbGenerator.hasReport()) {
-            influxDB.write(server.getDatabaseName(), TimeUnit.MILLISECONDS, cbGenerator.generate());
+            BatchPoints coberturaPoints = BatchPoints
+                    .database(server.getDatabaseName())
+                    .retentionPolicy("default")
+                    .points(cbGenerator.generate()).build();
+            influxDB.write(coberturaPoints);
         }
 
         SerieGenerator rfGenerator = new RobotFrameworkSerieGenerator(build);
         if(rfGenerator.hasReport()) {
-            influxDB.write(server.getDatabaseName(), TimeUnit.MILLISECONDS, rfGenerator.generate());
+            BatchPoints robotFrameworkPoints = BatchPoints
+                    .database(server.getDatabaseName())
+                    .retentionPolicy("default")
+                    .points(cbGenerator.generate())
+                    .build();
+            influxDB.write(robotFrameworkPoints);
         }
 
         return true;
@@ -145,7 +159,4 @@ public class InfluxDbPublisher extends Notifier {
     private InfluxDB openInfluxDb(Server server) {
         return InfluxDBFactory.connect("http://" + server.getHost() + ":" + server.getPort(), server.getUser(), server.getPassword());
     }
-
-
-
 }

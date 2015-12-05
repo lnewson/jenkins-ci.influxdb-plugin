@@ -5,11 +5,10 @@ import hudson.plugins.robot.RobotBuildAction;
 import hudson.plugins.robot.model.RobotCaseResult;
 import hudson.plugins.robot.model.RobotResult;
 import hudson.plugins.robot.model.RobotSuiteResult;
-import org.influxdb.dto.Serie;
+import org.influxdb.dto.Point;
 
-import java.awt.*;
 import java.util.*;
-import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by jrajala on 15.5.2015.
@@ -41,18 +40,18 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         return robotBuildAction != null && robotBuildAction.getResult() != null;
     }
 
-    public Serie[] generate() {
+    public Point[] generate() {
         RobotBuildAction robotBuildAction = build.getAction(RobotBuildAction.class);
 
-        List<Serie> seriesList = new ArrayList<Serie>();
+        List<Point> seriesList = new ArrayList<Point>();
 
         seriesList.add(generateOverviewSerie(robotBuildAction));
         seriesList.addAll(generateSubSeries(robotBuildAction.getResult()));
 
-        return seriesList.toArray(new Serie[seriesList.size()]);
+        return seriesList.toArray(new Point[seriesList.size()]);
     }
 
-    private Serie generateOverviewSerie(RobotBuildAction robotBuildAction) {
+    private Point generateOverviewSerie(RobotBuildAction robotBuildAction) {
         List<String> columns = new ArrayList<String>();
         List<Object> values = new ArrayList<Object>();
 
@@ -73,9 +72,11 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         addDuration(robotBuildAction, columns, values);
         addSuites(robotBuildAction, columns, values);
 
-        Serie.Builder builder = new Serie.Builder(getSeriePrefix());
-        return builder.columns(columns.toArray(new String[columns.size()])).values(values.toArray()).build();
-
+        HashMap<String, Object> fields = zipListsToMap(columns, values);
+        return Point.measurement(getSeriePrefix())
+                .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS)
+                .fields(fields)
+                .build();
     }
 
     private void addOverallFailCount(RobotBuildAction robotBuildAction, List<String> columnNames, List<Object> values) {
@@ -127,8 +128,8 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
     }
 
 
-    private List<Serie> generateSubSeries(RobotResult robotResult) {
-        List<Serie> subSeries = new ArrayList<Serie>();
+    private List<Point> generateSubSeries(RobotResult robotResult) {
+        List<Point> subSeries = new ArrayList<Point>();
         for(RobotSuiteResult suiteResult : robotResult.getAllSuites()) {
             subSeries.add(generateSuiteSerie(suiteResult));
 
@@ -144,7 +145,7 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         return subSeries;
     }
 
-    private Serie generateCaseSerie(RobotCaseResult caseResult) {
+    private Point generateCaseSerie(RobotCaseResult caseResult) {
         List<String> columns = new ArrayList<String>();
         List<Object> values = new ArrayList<Object>();
 
@@ -163,13 +164,19 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         columns.add(RF_DURATION);
         values.add(caseResult.getDuration());
 
-        Serie.Builder builder = new Serie.Builder(getCaseSerieName(caseResult));
+//        Serie.Builder builder = new Serie.Builder(getCaseSerieName(caseResult));
 
         for(String tag : caseResult.getTags()) {
             markTagResult(tag, caseResult);
         }
 
-        return builder.columns(columns.toArray(new String[columns.size()])).values(values.toArray()).build();
+        HashMap<String, Object> fields = zipListsToMap(columns, values);
+        return Point.measurement(getCaseSerieName(caseResult))
+                .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS)
+                .fields(fields)
+                .build();
+
+//        return builder.columns(columns.toArray(new String[columns.size()])).values(values.toArray()).build();
     }
 
     private final class RobotTagResult {
@@ -203,7 +210,7 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
 
     }
 
-    private Serie generateTagSerie(RobotTagResult tagResult) {
+    private Point generateTagSerie(RobotTagResult tagResult) {
         List<String> columns = new ArrayList<String>();
         List<Object> values = new ArrayList<Object>();
 
@@ -228,12 +235,14 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         columns.add(RF_DURATION);
         values.add(tagResult.duration);
 
-        Serie.Builder builder = new Serie.Builder(getTagSerieName(tagResult));
-
-        return builder.columns(columns.toArray(new String[columns.size()])).values(values.toArray()).build();
+        HashMap<String, Object> fields = zipListsToMap(columns, values);
+        return Point.measurement(getTagSerieName(tagResult))
+                .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS)
+                .fields(fields)
+                .build();
     }
 
-    private Serie generateSuiteSerie(RobotSuiteResult suiteResult) {
+    private Point generateSuiteSerie(RobotSuiteResult suiteResult) {
         List<String> columns = new ArrayList<String>();
         List<Object> values = new ArrayList<Object>();
 
@@ -264,8 +273,14 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         columns.add(RF_DURATION);
         values.add(suiteResult.getDuration());
 
-        Serie.Builder builder = new Serie.Builder(getSuiteSerieName(suiteResult));
-        return builder.columns(columns.toArray(new String[columns.size()])).values(values.toArray()).build();
+        HashMap<String, Object> fields = zipListsToMap(columns, values);
+        return Point.measurement(getSuiteSerieName(suiteResult))
+                .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS)
+                .fields(fields)
+                .build();
+//
+//        Serie.Builder builder = new Serie.Builder(getSuiteSerieName(suiteResult));
+//        return builder.columns(columns.toArray(new String[columns.size()])).values(values.toArray()).build();
     }
 
 

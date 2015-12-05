@@ -2,10 +2,12 @@ package org.jenkinsci.plugins.influxdb.generators;
 
 import hudson.model.AbstractBuild;
 import hudson.tasks.test.AbstractTestResultAction;
-import org.influxdb.dto.Serie;
+import org.influxdb.dto.Point;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by jrajala on 15.5.2015.
@@ -29,9 +31,7 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
         return true;
     }
 
-    public Serie[] generate() {
-        Serie.Builder builder = new Serie.Builder(getSerieName());
-
+    public Point[] generate() {
         List<String> columns = new ArrayList<String>();
         List<Object> values = new ArrayList<Object>();
 
@@ -47,8 +47,12 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
             addTestsTotal(build, columns, values);
         }
 
-        return new Serie[] {builder.columns(columns.toArray(new String[columns.size()])).values(values.toArray()).build()};
+        HashMap<String, Object> fields = zipListsToMap(columns, values);
 
+        return new Point[]{Point.measurement(getSerieName())
+                .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS)
+                .fields(fields)
+                .build()};
     }
 
 
@@ -86,8 +90,8 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
         columnNames.add(TESTS_SKIPPED);
     }
 
+    // Measurement
     private String getSerieName() {
         return build.getProject().getName()+".jenkins";
     }
-
 }

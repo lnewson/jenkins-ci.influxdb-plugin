@@ -5,11 +5,14 @@ import net.sourceforge.cobertura.coveragedata.ClassData;
 import net.sourceforge.cobertura.coveragedata.CoverageDataFileHandler;
 import net.sourceforge.cobertura.coveragedata.PackageData;
 import net.sourceforge.cobertura.coveragedata.ProjectData;
-import org.influxdb.dto.Serie;
+import org.influxdb.dto.Point;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by jrajala on 15.5.2015.
@@ -38,7 +41,7 @@ public class CoberturaSerieGenerator extends AbstractSerieGenerator {
         return (coberturaFile != null && coberturaFile.exists() && coberturaFile.canRead());
     }
 
-    public Serie[] generate() {
+    public Point[] generate() {
         coberturaProjectData = CoverageDataFileHandler.loadCoverageData(coberturaFile);
 
         List<String> columns = new ArrayList<String>();
@@ -55,10 +58,11 @@ public class CoberturaSerieGenerator extends AbstractSerieGenerator {
         addPackageCoverage(coberturaProjectData, columns, values);
         addClassCoverage(coberturaProjectData, columns, values);
 
-        Serie.Builder builder = new Serie.Builder(getSerieName());
-
-        return new Serie[] {builder.columns(columns.toArray(new String[columns.size()])).values(values.toArray()).build() };
-
+        HashMap<String, Object> fields = zipListsToMap(columns, values);
+        return new Point[]{Point.measurement(getSerieName())
+                .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS)
+                .fields(fields)
+                .build()};
     }
 
     private void addPackageCoverage(ProjectData projectData, List<String> columnNames, List<Object> values) {
