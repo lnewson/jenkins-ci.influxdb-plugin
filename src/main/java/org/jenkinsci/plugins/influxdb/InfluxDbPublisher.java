@@ -19,6 +19,7 @@ import org.jenkinsci.plugins.influxdb.generators.RobotFrameworkSerieGenerator;
 import org.jenkinsci.plugins.influxdb.generators.SerieGenerator;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -125,16 +126,19 @@ public class InfluxDbPublisher extends Notifier {
      */
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+        PrintStream logger = listener.getLogger();
         Server server = getServer();
         InfluxDB influxDB = openInfluxDb(server);
 
-        JenkinsBaseSerieGenerator jGenerator = new JenkinsBaseSerieGenerator(build);
+        logger.println("Influxdb publisher started");
+
+        JenkinsBaseSerieGenerator jGenerator = new JenkinsBaseSerieGenerator(build, logger);
         BatchPoints jenkinsBatchPoints = BatchPoints.database(server.getDatabaseName())
                 .retentionPolicy("default")
                 .points(jGenerator.generate()).build();
         influxDB.write(jenkinsBatchPoints);
 
-        CoberturaSerieGenerator cbGenerator = new CoberturaSerieGenerator(build);
+        CoberturaSerieGenerator cbGenerator = new CoberturaSerieGenerator(build, logger);
         if(cbGenerator.hasReport()) {
             BatchPoints coberturaPoints = BatchPoints
                     .database(server.getDatabaseName())
@@ -143,15 +147,17 @@ public class InfluxDbPublisher extends Notifier {
             influxDB.write(coberturaPoints);
         }
 
-        SerieGenerator rfGenerator = new RobotFrameworkSerieGenerator(build);
+        SerieGenerator rfGenerator = new RobotFrameworkSerieGenerator(build, logger);
         if(rfGenerator.hasReport()) {
             BatchPoints robotFrameworkPoints = BatchPoints
                     .database(server.getDatabaseName())
                     .retentionPolicy("default")
-                    .points(cbGenerator.generate())
+                    .points(rfGenerator.generate())
                     .build();
             influxDB.write(robotFrameworkPoints);
         }
+
+        logger.println("Influxdb publisher finished");
 
         return true;
     }

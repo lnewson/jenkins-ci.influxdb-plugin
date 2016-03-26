@@ -7,6 +7,7 @@ import hudson.plugins.robot.model.RobotResult;
 import hudson.plugins.robot.model.RobotSuiteResult;
 import org.influxdb.dto.Point;
 
+import java.io.PrintStream;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -27,11 +28,10 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
     public static final String RF_SUITES = "rf_suites";
     public static final String RF_TESTCASES = "rf_testcases";
 
-    private final AbstractBuild<?, ?> build;
     private final Map<String, RobotTagResult> tagResults;
 
-    public RobotFrameworkSerieGenerator(AbstractBuild<?, ?> build) {
-        this.build = build;
+    public RobotFrameworkSerieGenerator(AbstractBuild<?, ?> build, PrintStream logger) {
+        super(build, logger);
         tagResults = new Hashtable<String, RobotTagResult>();
     }
 
@@ -45,8 +45,12 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
 
         List<Point> seriesList = new ArrayList<Point>();
 
+        logger.println("Influxdb starting to generate Robot Framework report");
+
         seriesList.add(generateOverviewSerie(robotBuildAction));
         seriesList.addAll(generateSubSeries(robotBuildAction.getResult()));
+
+        logger.println("Influxdb Robot Framework report generation finished");
 
         return seriesList.toArray(new Point[seriesList.size()]);
     }
@@ -73,6 +77,7 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         addSuites(robotBuildAction, columns, values);
 
         HashMap<String, Object> fields = zipListsToMap(columns, values);
+
         return Point.measurement(getSeriePrefix())
                 .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS)
                 .fields(fields)

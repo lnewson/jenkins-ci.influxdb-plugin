@@ -8,6 +8,7 @@ import net.sourceforge.cobertura.coveragedata.ProjectData;
 import org.influxdb.dto.Point;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,12 +29,11 @@ public class CoberturaSerieGenerator extends AbstractSerieGenerator {
     public static final String COBERTURA_NUMBER_OF_CLASSES = "cobertura_number_of_classes";
     private static final String COBERTURA_REPORT_FILE = "/target/cobertura/cobertura.ser";
 
-    private final AbstractBuild<?, ?> build;
     private ProjectData coberturaProjectData;
     private final File coberturaFile;
 
-    public CoberturaSerieGenerator(AbstractBuild<?, ?> build) {
-        this.build = build;
+    public CoberturaSerieGenerator(AbstractBuild<?, ?> build, PrintStream logger) {
+        super(build, logger);
         coberturaFile = new File(build.getWorkspace() + COBERTURA_REPORT_FILE);
     }
 
@@ -47,6 +47,8 @@ public class CoberturaSerieGenerator extends AbstractSerieGenerator {
         List<String> columns = new ArrayList<String>();
         List<Object> values = new ArrayList<Object>();
 
+        logger.println("Influxdb starting to generate Cobertura report");
+
         addJenkinsBuildNumber(build, columns, values);
         addJenkinsProjectName(build, columns, values);
 
@@ -59,6 +61,9 @@ public class CoberturaSerieGenerator extends AbstractSerieGenerator {
         addClassCoverage(coberturaProjectData, columns, values);
 
         HashMap<String, Object> fields = zipListsToMap(columns, values);
+
+        logger.println("Influxdb Cobertura report generation finished");
+
         return new Point[]{Point.measurement(getSerieName())
                 .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS)
                 .fields(fields)

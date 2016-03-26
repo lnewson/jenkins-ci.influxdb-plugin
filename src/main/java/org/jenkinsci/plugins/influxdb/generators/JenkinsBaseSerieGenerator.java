@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.io.PrintStream;
 
 /**
  * Created by jrajala on 15.5.2015.
@@ -21,10 +22,8 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
     public static final String TESTS_SKIPPED = "tests_skipped";
     public static final String TESTS_TOTAL = "tests_total";
 
-    private final AbstractBuild<?, ?> build;
-
-    public JenkinsBaseSerieGenerator(AbstractBuild<?, ?> build) {
-        this.build = build;
+    public JenkinsBaseSerieGenerator(AbstractBuild<?, ?> build, PrintStream logger) {
+        super(build, logger);
     }
 
     public boolean hasReport() {
@@ -34,6 +33,8 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
     public Point[] generate() {
         List<String> columns = new ArrayList<String>();
         List<Object> values = new ArrayList<Object>();
+
+        logger.println("Influxdb starting to generate basic report");
 
         addJenkinsBuildNumber(build, columns, values);
         addJenkinsProjectName(build, columns, values);
@@ -48,6 +49,8 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
         }
 
         HashMap<String, Object> fields = zipListsToMap(columns, values);
+
+        logger.println("Influxdb basic report generation finished");
 
         return new Point[]{Point.measurement(getSerieName())
                 .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS)
