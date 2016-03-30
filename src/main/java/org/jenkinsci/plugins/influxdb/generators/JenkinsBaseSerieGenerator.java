@@ -15,7 +15,7 @@ import java.io.PrintStream;
  */
 public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
 
-    public static final String BUILD_TIME = "build_time";
+    public static final String BUILD_DURATION = "build_duration";
     public static final String BUILD_STATUS_MESSAGE = "build_status_message";
     public static final String PROJECT_BUILD_HEALTH = "project_build_health";
     public static final String TESTS_FAILED = "tests_failed";
@@ -60,7 +60,7 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
 
 
     private void addBuildDuration(AbstractBuild<?, ?> build, List<String> columnNames, List<Object> values) {
-        columnNames.add(BUILD_TIME);
+        columnNames.add(BUILD_DURATION);
         values.add(build.getDuration());
     }
 
