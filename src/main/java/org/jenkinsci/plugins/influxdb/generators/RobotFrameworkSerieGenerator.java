@@ -27,7 +27,10 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
     public static final String RF_DURATION = "rf_duration";
     public static final String RF_SUITES = "rf_suites";
     public static final String RF_TESTCASES = "rf_testcases";
-
+    public static final String RF_CASE_NAME = "rf_case_name";
+    public static final String RF_CASE_SUITE = "rf_suite";
+    public static final String RF_TAG_NAME = "rf_tag";
+    
     private final Map<String, RobotTagResult> tagResults;
 
     public RobotFrameworkSerieGenerator(AbstractBuild<?, ?> build, PrintStream logger) {
@@ -154,6 +157,12 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         List<String> columns = new ArrayList<String>();
         List<Object> values = new ArrayList<Object>();
 
+        columns.add(RF_CASE_NAME);
+        values.add(caseResult.getName());
+
+        columns.add(RF_CASE_SUITE);
+        values.add(caseResult.getParent().getName());
+
         columns.add(RF_CRITICAL_FAILED);
         values.add(caseResult.getCriticalFailed());
 
@@ -173,6 +182,8 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
 
         for(String tag : caseResult.getTags()) {
             markTagResult(tag, caseResult);
+            columns.add("tag-" + tag);
+            values.add("1");
         }
 
         HashMap<String, Object> fields = zipListsToMap(columns, values);
@@ -218,6 +229,9 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
     private Point generateTagSerie(RobotTagResult tagResult) {
         List<String> columns = new ArrayList<String>();
         List<Object> values = new ArrayList<Object>();
+
+        columns.add(RF_TAG_NAME);
+        values.add(tagResult.name);
 
         columns.add(RF_CRITICAL_FAILED);
         values.add(tagResult.criticalFailed);
@@ -280,9 +294,10 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
 
         HashMap<String, Object> fields = zipListsToMap(columns, values);
         return Point.measurement(getSuiteSerieName(suiteResult))
-                .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS)
-                .fields(fields)
-                .build();
+            .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS)
+            .tag("suite", suiteResult.getName())
+            .fields(fields)
+            .build();
 //
 //        Serie.Builder builder = new Serie.Builder(getSuiteSerieName(suiteResult));
 //        return builder.columns(columns.toArray(new String[columns.size()])).values(values.toArray()).build();
@@ -291,11 +306,11 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
 
 
     private String getTagSerieName(RobotTagResult tagResult) {
-        return getTagSeriePrefix()+"."+tagResult.name;
+        return getTagSeriePrefix();
     }
 
     private String getCaseSerieName(RobotCaseResult caseResult) {
-        return getCaseSeriePrefix()+"."+caseResult.getDuplicateSafeName();
+        return getCaseSeriePrefix();
     }
 
     private String getCaseSeriePrefix() {
@@ -303,7 +318,7 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
     }
 
     private String getSuiteSerieName(RobotSuiteResult suiteResult) {
-        return getSuiteSeriePrefix()+"."+suiteResult.getDuplicateSafeName();
+        return getSuiteSeriePrefix();
     }
 
     private String getTagSeriePrefix() {
