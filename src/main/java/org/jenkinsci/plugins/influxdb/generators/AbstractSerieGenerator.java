@@ -24,12 +24,12 @@ public abstract class AbstractSerieGenerator implements SerieGenerator {
         this.logger = logger;
     }
 
-    protected void addJenkinsProjectName(AbstractBuild<?, ?> build, List<String> columnNames, List<Object> values) {
+    protected void addJenkinsProjectName(List<String> columnNames, List<Object> values) {
         columnNames.add(PROJECT_NAME);
         values.add(build.getProject().getName());
     }
 
-    protected void addJenkinsBuildNumber(AbstractBuild<?, ?> build, List<String> columnNames, List<Object> values) {
+    protected void addJenkinsBuildNumber(List<String> columnNames, List<Object> values) {
         columnNames.add(BUILD_NUMBER);
         values.add(build.getNumber());
     }

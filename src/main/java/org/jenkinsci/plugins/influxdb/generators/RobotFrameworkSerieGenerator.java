@@ -59,8 +59,8 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         List<String> columns = new ArrayList<String>();
         List<Object> values = new ArrayList<Object>();
 
-        addJenkinsBuildNumber(build, columns, values);
-        addJenkinsProjectName(build, columns, values);
+        addJenkinsBuildNumber(columns, values);
+        addJenkinsProjectName(columns, values);
 
         addOverallFailCount(robotBuildAction, columns, values);
         addOverallPassedCount(robotBuildAction, columns, values);
@@ -251,8 +251,8 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         List<String> columns = new ArrayList<String>();
         List<Object> values = new ArrayList<Object>();
 
-        addJenkinsBuildNumber(build, columns, values);
-        addJenkinsProjectName(build, columns, values);
+        addJenkinsBuildNumber(columns, values);
+        addJenkinsProjectName(columns, values);
 
         columns.add(RF_TESTCASES);
         values.add(suiteResult.getAllCases().size());

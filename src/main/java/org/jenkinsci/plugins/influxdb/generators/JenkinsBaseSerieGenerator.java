@@ -36,16 +36,16 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
 
         logger.println("Influxdb starting to generate basic report");
 
-        addJenkinsBuildNumber(build, columns, values);
-        addJenkinsProjectName(build, columns, values);
-        addBuildDuration(build, columns, values);
-        addBuildStatusSummaryMesssage(build, columns, values);
-        addProjectBuildHealth(build, columns, values);
+        addJenkinsBuildNumber(columns, values);
+        addJenkinsProjectName(columns, values);
+        addBuildDuration(columns, values);
+        addBuildStatusSummaryMesssage(columns, values);
+        addProjectBuildHealth(columns, values);
 
-        if(hasTestResults(build)) {
-            addTestsFailed(build, columns, values);
-            addTestsSkipped(build, columns, values);
-            addTestsTotal(build, columns, values);
+        if(hasTestResults()) {
+            addTestsFailed(columns, values);
+            addTestsSkipped(columns, values);
+            addTestsTotal(columns, values);
         }
 
         HashMap<String, Object> fields = zipListsToMap(columns, values);
@@ -59,36 +59,36 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
     }
 
 
-    private void addBuildDuration(AbstractBuild<?, ?> build, List<String> columnNames, List<Object> values) {
+    private void addBuildDuration(List<String> columnNames, List<Object> values) {
         columnNames.add(BUILD_DURATION);
         values.add(build.getDuration());
     }
 
-    private void addBuildStatusSummaryMesssage(AbstractBuild<?, ?> build, List<String> columnNames, List<Object> values) {
+    private void addBuildStatusSummaryMesssage(List<String> columnNames, List<Object> values) {
         columnNames.add(BUILD_STATUS_MESSAGE);
         values.add(build.getBuildStatusSummary().message);
     }
 
-    private void addProjectBuildHealth(AbstractBuild<?, ?> build, List<String> columnNames, List<Object> values) {
+    private void addProjectBuildHealth(List<String> columnNames, List<Object> values) {
         columnNames.add(PROJECT_BUILD_HEALTH);
         values.add(build.getProject().getBuildHealth().getScore());
     }
 
-    private boolean hasTestResults(AbstractBuild<?, ?> build) {
+    private boolean hasTestResults() {
         return build.getAction(AbstractTestResultAction.class) != null;
     }
 
-    private void addTestsTotal(AbstractBuild<?, ?> build, List<String> columnNames, List<Object> values) {
+    private void addTestsTotal(List<String> columnNames, List<Object> values) {
         values.add(build.getAction(AbstractTestResultAction.class).getTotalCount());
         columnNames.add(TESTS_TOTAL);
     }
 
-    private void addTestsFailed(AbstractBuild<?, ?> build, List<String> columnNames, List<Object> values) {
+    private void addTestsFailed(List<String> columnNames, List<Object> values) {
         values.add(build.getAction(AbstractTestResultAction.class).getFailCount());
         columnNames.add(TESTS_FAILED);
     }
 
-    private void addTestsSkipped(AbstractBuild<?, ?> build, List<String> columnNames, List<Object> values) {
+    private void addTestsSkipped(List<String> columnNames, List<Object> values) {
         values.add(build.getAction(AbstractTestResultAction.class).getSkipCount());
         columnNames.add(TESTS_SKIPPED);
     }
