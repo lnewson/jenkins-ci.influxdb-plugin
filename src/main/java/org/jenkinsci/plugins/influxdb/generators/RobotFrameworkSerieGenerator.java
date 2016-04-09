@@ -30,6 +30,7 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
     public static final String RF_CASE_NAME = "rf_case_name";
     public static final String RF_CASE_SUITE = "rf_suite";
     public static final String RF_TAG_NAME = "rf_tag";
+    public static final String RF_TAG_LIST = "rf_tag_list";
     
     private final Map<String, RobotTagResult> tagResults;
 
@@ -157,11 +158,8 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         List<String> columns = new ArrayList<String>();
         List<Object> values = new ArrayList<Object>();
 
-        columns.add(RF_CASE_NAME);
-        values.add(caseResult.getName());
-
-        columns.add(RF_CASE_SUITE);
-        values.add(caseResult.getParent().getName());
+        addJenkinsBuildNumber(columns, values);
+        addJenkinsProjectName(columns, values);
 
         columns.add(RF_CRITICAL_FAILED);
         values.add(caseResult.getCriticalFailed());
@@ -178,21 +176,29 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         columns.add(RF_DURATION);
         values.add(caseResult.getDuration());
 
-//        Serie.Builder builder = new Serie.Builder(getCaseSerieName(caseResult));
-
+        StringBuilder tagListBuilder = new StringBuilder();
         for(String tag : caseResult.getTags()) {
             markTagResult(tag, caseResult);
-            columns.add("tag-" + tag);
-            values.add("1");
+            tagListBuilder.append(tag);
+            tagListBuilder.append(";");
         }
+        // remove training comma
+        String tagList = tagListBuilder.length() > 0 ? tagListBuilder.substring(0, tagListBuilder.length() - 1): "";
 
         HashMap<String, Object> fields = zipListsToMap(columns, values);
-        return Point.measurement(getCaseSerieName(caseResult))
-                .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS)
-                .fields(fields)
-                .build();
 
-//        return builder.columns(columns.toArray(new String[columns.size()])).values(values.toArray()).build();
+        Point.Builder pointBuilder = Point.measurement(getCaseSerieName(caseResult))
+            .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS)
+            .fields(fields);
+
+        if (tagList.length() > 0) {
+            pointBuilder.tag(RF_TAG_LIST, tagList);
+        }
+
+        pointBuilder.tag(RF_CASE_NAME, caseResult.getName());
+        pointBuilder.tag(RF_CASE_SUITE, caseResult.getParent().getName());
+
+        return pointBuilder.build();
     }
 
     private final class RobotTagResult {
@@ -230,8 +236,8 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         List<String> columns = new ArrayList<String>();
         List<Object> values = new ArrayList<Object>();
 
-        columns.add(RF_TAG_NAME);
-        values.add(tagResult.name);
+        addJenkinsBuildNumber(columns, values);
+        addJenkinsProjectName(columns, values);
 
         columns.add(RF_CRITICAL_FAILED);
         values.add(tagResult.criticalFailed);
@@ -256,9 +262,10 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
 
         HashMap<String, Object> fields = zipListsToMap(columns, values);
         return Point.measurement(getTagSerieName(tagResult))
-                .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS)
-                .fields(fields)
-                .build();
+            .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS)
+            .fields(fields)
+            .tag(RF_TAG_NAME, tagResult.name)
+            .build();
     }
 
     private Point generateSuiteSerie(RobotSuiteResult suiteResult) {
@@ -293,6 +300,7 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         values.add(suiteResult.getDuration());
 
         HashMap<String, Object> fields = zipListsToMap(columns, values);
+
         return Point.measurement(getSuiteSerieName(suiteResult))
             .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS)
             .tag("suite", suiteResult.getName())
