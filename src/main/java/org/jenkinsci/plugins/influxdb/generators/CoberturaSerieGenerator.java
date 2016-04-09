@@ -69,6 +69,9 @@ public class CoberturaSerieGenerator extends AbstractSerieGenerator {
 
         logger.println("Influxdb starting to generate Cobertura report");
 
+        addJenkinsBuildNumber(columNames, values);
+        addJenkinsProjectName(columNames, values);
+
         if (hasCoberturaReport()) {
             generateCoberturaReport(columNames, values);
         }
