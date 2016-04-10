@@ -64,43 +64,36 @@ public class CoberturaSerieGenerator extends AbstractSerieGenerator {
     }
 
     public Point[] generate() {
-        List<String> columNames = new ArrayList<String>();
-        List<Object> values = new ArrayList<Object>();
+        Point.Builder pointBuilder = Point.measurement(getSerieName())
+            .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS);
 
         logger.println("Influxdb starting to generate Cobertura report");
 
-        addJenkinsBuildNumber(columNames, values);
-        addJenkinsProjectName(columNames, values);
+        addJenkinsBaseInfo(pointBuilder);
 
         if (hasCoberturaReport()) {
-            generateCoberturaReport(columNames, values);
+            generateCoberturaReport(pointBuilder);
         }
         else if (hasJavaReport()) {
-            generateJavaReport(columNames, values);
+            generateJavaReport(pointBuilder);
         }
 
-        HashMap<String, Object> fields = zipListsToMap(columNames, values);
+        logger.println("Influxdb Cobertura report generation finished");
 
-        logger.println("Influxdb Cobertura report generation finished with " + fields.size() +  " values to report");
-
-        return new Point[]{Point.measurement(getSerieName())
-                .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS)
-                .fields(fields)
-                .build()};
+        return new Point[]{pointBuilder.build()};
     }
 
-    private void generateCoberturaReport(List<String> columnNames, List<Object> values) {
+    private void generateCoberturaReport(Point.Builder pointBuilder) {
         logger.println("Generating Cobertura report using cobertura plugin");
 
-        columnNames.add(COBERTURA_PACKAGE_COVERAGE_RATE);
-        values.add(getCoveragePercentage(coberturaCoverageResult, CoverageMetric.PACKAGES));
-        columnNames.add(COBERTURA_NUMBER_OF_PACKAGES);
-        values.add(getCoverageValue(coberturaCoverageResult, CoverageMetric.PACKAGES));
-
-        columnNames.add(COBERTURA_SOURCEFILE_COVERAGE_RATE);
-        values.add(getCoveragePercentage(coberturaCoverageResult, CoverageMetric.FILES));
-        columnNames.add(COBERTURA_NUMBER_OF_SOURCEFILES);
-        values.add(getCoverageValue(coberturaCoverageResult, CoverageMetric.FILES));
+        pointBuilder.field(COBERTURA_PACKAGE_COVERAGE_RATE,
+                           getCoveragePercentage(coberturaCoverageResult, CoverageMetric.PACKAGES));
+        pointBuilder.field(COBERTURA_NUMBER_OF_PACKAGES,
+                           getCoverageValue(coberturaCoverageResult, CoverageMetric.PACKAGES));
+        pointBuilder.field(COBERTURA_SOURCEFILE_COVERAGE_RATE,
+                           getCoveragePercentage(coberturaCoverageResult, CoverageMetric.FILES));
+        pointBuilder.field(COBERTURA_NUMBER_OF_SOURCEFILES,
+                           getCoverageValue(coberturaCoverageResult, CoverageMetric.FILES));
 
         /**
          * these are left out
@@ -108,84 +101,52 @@ public class CoberturaSerieGenerator extends AbstractSerieGenerator {
          * getCoveragePercentage(result, CoverageMetric.CONDITIONAL);
          */
 
-        columnNames.add(COBERTURA_CLASS_COVERAGE_RATE);
-        values.add(getCoveragePercentage(coberturaCoverageResult, CoverageMetric.CLASSES));
-        columnNames.add(COBERTURA_NUMBER_OF_CLASSES);
-        values.add(getCoverageValue(coberturaCoverageResult, CoverageMetric.CLASSES));
+        pointBuilder.field(COBERTURA_CLASS_COVERAGE_RATE, getCoveragePercentage(coberturaCoverageResult, CoverageMetric.CLASSES));
+        pointBuilder.field(COBERTURA_NUMBER_OF_CLASSES, getCoverageValue(coberturaCoverageResult, CoverageMetric.CLASSES));
 
-        columnNames.add(COBERTURA_LINE_COVERAGE_RATE);
-        values.add(getCoveragePercentage(coberturaCoverageResult, CoverageMetric.LINE));
-        columnNames.add(COBERTURA_NUMBER_OF_LINES);
-        values.add(getCoverageValue(coberturaCoverageResult, CoverageMetric.LINE));
+        pointBuilder.field(COBERTURA_LINE_COVERAGE_RATE, getCoveragePercentage(coberturaCoverageResult, CoverageMetric.LINE));
+        pointBuilder.field(COBERTURA_NUMBER_OF_LINES, getCoverageValue(coberturaCoverageResult, CoverageMetric.LINE));
     }
 
-    private void generateJavaReport(List<String> columnNames, List<Object> values) {
-        ProjectData coberturaProjectData = CoverageDataFileHandler.loadCoverageData(coberturaFile);
+    private void generateJavaReport(Point.Builder pointBuilder) {
+        ProjectData coberturaData = CoverageDataFileHandler.loadCoverageData(coberturaFile);
 
-        addJenkinsBuildNumber(columnNames, values);
-        addJenkinsProjectName(columnNames, values);
+        addJenkinsBaseInfo(pointBuilder);
 
-        addNumberOfPackages(coberturaProjectData, columnNames, values);
-        addNumberOfSourceFiles(coberturaProjectData, columnNames, values);
-        addNumberOfClasses(coberturaProjectData, columnNames, values);
-        addBranchCoverageRate(coberturaProjectData, columnNames, values);
-        addLineCoverageRate(coberturaProjectData, columnNames, values);
-        addPackageCoverage(coberturaProjectData, columnNames, values);
-        addClassCoverage(coberturaProjectData, columnNames, values);
+        pointBuilder.field(COBERTURA_NUMBER_OF_PACKAGES, coberturaData.getPackages().size());
+        pointBuilder.field(COBERTURA_NUMBER_OF_SOURCEFILES, coberturaData.getNumberOfSourceFiles());
+        pointBuilder.field(COBERTURA_NUMBER_OF_CLASSES, coberturaData.getNumberOfClasses());
+        pointBuilder.field(COBERTURA_BRANCH_COVERAGE_RATE, coberturaData.getBranchCoverageRate()*100d);
+        pointBuilder.field(COBERTURA_LINE_COVERAGE_RATE, coberturaData.getLineCoverageRate()*100d);
 
+        addPackageCoverage(coberturaData, pointBuilder);
+        addClassCoverage(coberturaData, pointBuilder);
     }
 
-    private void addPackageCoverage(ProjectData projectData, List<String> columnNames, List<Object> values) {
-        double totalPacakges = projectData.getPackages().size();
+    private void addPackageCoverage(ProjectData coberturaData, Point.Builder pointBuilder) {
+        double totalPacakges = coberturaData.getPackages().size();
         double packagesCovered = 0;
-        for(Object nextPackage : projectData.getPackages()) {
+        for(Object nextPackage : coberturaData.getPackages()) {
             PackageData packageData = (PackageData) nextPackage;
             if(packageData.getLineCoverageRate() > 0)
                 packagesCovered++;
         }
         double packageCoverage = packagesCovered / totalPacakges;
 
-        columnNames.add(COBERTURA_PACKAGE_COVERAGE_RATE);
-        values.add(packageCoverage*100d);
+        pointBuilder.field(COBERTURA_PACKAGE_COVERAGE_RATE, packageCoverage*100d);
     }
 
-    private void addClassCoverage(ProjectData projectData, List<String> columnNames, List<Object> values) {
-        double totalClasses = projectData.getNumberOfClasses();
+    private void addClassCoverage(ProjectData coberturaData, Point.Builder pointBuilder) {
+        double totalClasses = coberturaData.getNumberOfClasses();
         double classesCovered = 0;
-        for(Object nextClass : projectData.getClasses()) {
+        for(Object nextClass : coberturaData.getClasses()) {
             ClassData classData = (ClassData) nextClass;
             if(classData.getLineCoverageRate() > 0)
                 classesCovered++;
         }
         double classCoverage = classesCovered / totalClasses;
 
-        columnNames.add(COBERTURA_CLASS_COVERAGE_RATE);
-        values.add(classCoverage*100d);
-    }
-
-    private void addLineCoverageRate(ProjectData projectData, List<String> columnNames, List<Object> values) {
-        columnNames.add(COBERTURA_LINE_COVERAGE_RATE);
-        values.add(projectData.getLineCoverageRate()*100d);
-    }
-
-    private void addBranchCoverageRate(ProjectData projectData, List<String> columnNames, List<Object> values) {
-        columnNames.add(COBERTURA_BRANCH_COVERAGE_RATE);
-        values.add(projectData.getBranchCoverageRate()*100d);
-    }
-
-    private void addNumberOfPackages(ProjectData projectData, List<String> columnNames, List<Object> values) {
-        columnNames.add(COBERTURA_NUMBER_OF_PACKAGES);
-        values.add(projectData.getPackages().size());
-    }
-
-    private void addNumberOfSourceFiles(ProjectData projectData, List<String> columnNames, List<Object> values) {
-        columnNames.add(COBERTURA_NUMBER_OF_SOURCEFILES);
-        values.add(projectData.getNumberOfSourceFiles());
-    }
-
-    private void addNumberOfClasses(ProjectData projectData, List<String> columnNames, List<Object> values) {
-        columnNames.add(COBERTURA_NUMBER_OF_CLASSES);
-        values.add(projectData.getNumberOfClasses());
+        pointBuilder.field(COBERTURA_CLASS_COVERAGE_RATE, classCoverage*100d);
     }
 
     private String getSerieName() {

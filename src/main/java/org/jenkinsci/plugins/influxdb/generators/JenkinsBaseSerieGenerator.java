@@ -31,69 +31,32 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
     }
 
     public Point[] generate() {
-        List<String> columns = new ArrayList<String>();
-        List<Object> values = new ArrayList<Object>();
+        Point.Builder pointBuilder = Point.measurement(getSerieName())
+            .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS);
 
         logger.println("Influxdb starting to generate basic report");
 
-        addJenkinsBuildNumber(columns, values);
-        addJenkinsProjectName(columns, values);
-        addBuildDuration(columns, values);
-        addBuildStatusSummaryMesssage(columns, values);
-        addProjectBuildHealth(columns, values);
+        addJenkinsBaseInfo(pointBuilder);
+
+        pointBuilder.field(BUILD_DURATION, build.getDuration());
+        pointBuilder.field(BUILD_STATUS_MESSAGE, build.getBuildStatusSummary().message);
+        pointBuilder.field(PROJECT_BUILD_HEALTH, build.getProject().getBuildHealth().getScore());
 
         if(hasTestResults()) {
-            addTestsFailed(columns, values);
-            addTestsSkipped(columns, values);
-            addTestsTotal(columns, values);
+            pointBuilder.field(TESTS_TOTAL, build.getAction(AbstractTestResultAction.class).getTotalCount());
+            pointBuilder.field(TESTS_FAILED, build.getAction(AbstractTestResultAction.class).getFailCount());
+            pointBuilder.field(TESTS_SKIPPED, build.getAction(AbstractTestResultAction.class).getSkipCount());
         }
-
-        HashMap<String, Object> fields = zipListsToMap(columns, values);
 
         logger.println("Influxdb basic report generation finished");
 
-        return new Point[]{Point.measurement(getSerieName())
-                .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS)
-                .fields(fields)
-                .build()};
-    }
-
-
-    private void addBuildDuration(List<String> columnNames, List<Object> values) {
-        columnNames.add(BUILD_DURATION);
-        values.add(build.getDuration());
-    }
-
-    private void addBuildStatusSummaryMesssage(List<String> columnNames, List<Object> values) {
-        columnNames.add(BUILD_STATUS_MESSAGE);
-        values.add(build.getBuildStatusSummary().message);
-    }
-
-    private void addProjectBuildHealth(List<String> columnNames, List<Object> values) {
-        columnNames.add(PROJECT_BUILD_HEALTH);
-        values.add(build.getProject().getBuildHealth().getScore());
+        return new Point[]{pointBuilder.build()};
     }
 
     private boolean hasTestResults() {
         return build.getAction(AbstractTestResultAction.class) != null;
     }
 
-    private void addTestsTotal(List<String> columnNames, List<Object> values) {
-        values.add(build.getAction(AbstractTestResultAction.class).getTotalCount());
-        columnNames.add(TESTS_TOTAL);
-    }
-
-    private void addTestsFailed(List<String> columnNames, List<Object> values) {
-        values.add(build.getAction(AbstractTestResultAction.class).getFailCount());
-        columnNames.add(TESTS_FAILED);
-    }
-
-    private void addTestsSkipped(List<String> columnNames, List<Object> values) {
-        values.add(build.getAction(AbstractTestResultAction.class).getSkipCount());
-        columnNames.add(TESTS_SKIPPED);
-    }
-
-    // Measurement
     private String getSerieName() {
         return build.getProject().getName()+".jenkins";
     }

@@ -24,21 +24,8 @@ public abstract class AbstractSerieGenerator implements SerieGenerator {
         this.logger = logger;
     }
 
-    protected void addJenkinsProjectName(List<String> columnNames, List<Object> values) {
-        columnNames.add(PROJECT_NAME);
-        values.add(build.getProject().getName());
-    }
-
-    protected void addJenkinsBuildNumber(List<String> columnNames, List<Object> values) {
-        columnNames.add(BUILD_NUMBER);
-        values.add(build.getNumber());
-    }
-
-    protected HashMap<String, Object> zipListsToMap(List<String> columns, List<Object> values) {
-        HashMap<String, Object> fields = new HashMap<String, Object>();
-        for(int i=0; i<columns.size(); i++){
-            fields.put(columns.get(i), values.get(i));
-        }
-        return fields;
+    protected void addJenkinsBaseInfo(Point.Builder pointBuilder) {
+        pointBuilder.field(PROJECT_NAME, build.getProject().getName());
+        pointBuilder.field(BUILD_NUMBER, build.getNumber());
     }
 }
