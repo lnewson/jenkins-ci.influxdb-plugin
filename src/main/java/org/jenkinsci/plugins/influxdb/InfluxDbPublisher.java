@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author jrajala-eficode
  * @author joachimrodrigues
- * 
+ *
  */
 public class InfluxDbPublisher extends Notifier {
 
@@ -89,7 +89,7 @@ public class InfluxDbPublisher extends Notifier {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hudson.tasks.Publisher#needsToRunAfterFinalized()
      */
     @Override
@@ -99,7 +99,7 @@ public class InfluxDbPublisher extends Notifier {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hudson.tasks.BuildStep#getRequiredMonitorService()
      */
     @Override
@@ -109,7 +109,7 @@ public class InfluxDbPublisher extends Notifier {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hudson.tasks.Notifier#getDescriptor()
      */
     @Override
@@ -119,7 +119,7 @@ public class InfluxDbPublisher extends Notifier {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * hudson.tasks.BuildStepCompatibilityLayer#perform(hudson.model.AbstractBuild
      * , hudson.Launcher, hudson.model.BuildListener)

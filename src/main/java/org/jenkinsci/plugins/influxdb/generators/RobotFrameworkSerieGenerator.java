@@ -32,7 +32,7 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
     public static final String RF_TAG_NAME = "rf_tag";
     public static final String RF_TAG_LIST = "rf_tag_list";
     public static final String RF_SUITE_NAME = "rf_suite";
-    
+
     private final Map<String, RobotTagResult> tagResults;
 
     public RobotFrameworkSerieGenerator(AbstractBuild<?, ?> build, PrintStream logger) {
