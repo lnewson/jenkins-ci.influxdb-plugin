@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.influxdb.generators;
 
+import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.tasks.test.AbstractTestResultAction;
 import org.influxdb.dto.Point;
@@ -16,6 +17,8 @@ import java.io.PrintStream;
 public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
 
     public static final String BUILD_DURATION = "build_duration";
+    public static final String BUILD_RESULT = "build_result";
+    public static final String BUILD_RESULT_ORDINAL = "build_result_ordinal";
     public static final String BUILD_STATUS_MESSAGE = "build_status_message";
     public static final String PROJECT_BUILD_HEALTH = "project_build_health";
     public static final String TESTS_FAILED = "tests_failed";
@@ -41,6 +44,8 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
         pointBuilder.field(BUILD_DURATION, build.getDuration());
         pointBuilder.field(BUILD_STATUS_MESSAGE, build.getBuildStatusSummary().message);
         pointBuilder.field(PROJECT_BUILD_HEALTH, build.getProject().getBuildHealth().getScore());
+        pointBuilder.field(BUILD_RESULT, build.getResult().toString());
+        pointBuilder.field(BUILD_RESULT_ORDINAL, build.getResult().ordinal);
 
         if(hasTestResults()) {
             pointBuilder.field(TESTS_TOTAL, build.getAction(AbstractTestResultAction.class).getTotalCount());
