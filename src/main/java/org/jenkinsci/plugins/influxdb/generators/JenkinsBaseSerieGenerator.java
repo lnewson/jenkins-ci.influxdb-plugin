@@ -22,6 +22,8 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
     public static final String BUILD_STATUS_MESSAGE = "build_status_message";
     public static final String PROJECT_BUILD_STABILITY = "project_build_stability";
     public static final String PROJECT_BUILD_HEALTH = "project_build_health";
+    public static final String PROJECT_LAST_SUCCESSFUL = "last_successful_build";
+    public static final String PROJECT_LAST_STABLE = "last_stable_build";
     public static final String TESTS_FAILED = "tests_failed";
     public static final String TESTS_SKIPPED = "tests_skipped";
     public static final String TESTS_TOTAL = "tests_total";
@@ -43,11 +45,13 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
         addJenkinsBaseInfo(pointBuilder);
 
         pointBuilder.field(BUILD_DURATION, build.getDuration());
+        pointBuilder.field(BUILD_RESULT, build.getResult().toString());
+        pointBuilder.field(BUILD_RESULT_ORDINAL, build.getResult().ordinal);
         pointBuilder.field(BUILD_STATUS_MESSAGE, build.getBuildStatusSummary().message);
         pointBuilder.field(PROJECT_BUILD_STABILITY, build.getProject().getBuildHealth().getScore());
         pointBuilder.field(PROJECT_BUILD_HEALTH, getBuildHealth());
-        pointBuilder.field(BUILD_RESULT, build.getResult().toString());
-        pointBuilder.field(BUILD_RESULT_ORDINAL, build.getResult().ordinal);
+        pointBuilder.field(PROJECT_LAST_SUCCESSFUL, build.getProject().getLastSuccessfulBuild().getNumber());
+        pointBuilder.field(PROJECT_LAST_STABLE, build.getProject().getLastStableBuild().getNumber());
 
         if(hasTestResults()) {
             pointBuilder.field(TESTS_TOTAL, build.getAction(AbstractTestResultAction.class).getTotalCount());
