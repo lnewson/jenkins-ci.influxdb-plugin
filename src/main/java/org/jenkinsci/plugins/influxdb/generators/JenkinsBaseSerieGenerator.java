@@ -20,6 +20,7 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
     public static final String BUILD_RESULT = "build_result";
     public static final String BUILD_RESULT_ORDINAL = "build_result_ordinal";
     public static final String BUILD_STATUS_MESSAGE = "build_status_message";
+    public static final String PROJECT_BUILD_STABILITY = "project_build_stability";
     public static final String PROJECT_BUILD_HEALTH = "project_build_health";
     public static final String TESTS_FAILED = "tests_failed";
     public static final String TESTS_SKIPPED = "tests_skipped";
@@ -43,7 +44,8 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
 
         pointBuilder.field(BUILD_DURATION, build.getDuration());
         pointBuilder.field(BUILD_STATUS_MESSAGE, build.getBuildStatusSummary().message);
-        pointBuilder.field(PROJECT_BUILD_HEALTH, build.getProject().getBuildHealth().getScore());
+        pointBuilder.field(PROJECT_BUILD_STABILITY, build.getProject().getBuildHealth().getScore());
+        pointBuilder.field(PROJECT_BUILD_HEALTH, getBuildHealth());
         pointBuilder.field(BUILD_RESULT, build.getResult().toString());
         pointBuilder.field(BUILD_RESULT_ORDINAL, build.getResult().ordinal);
 
@@ -60,6 +62,23 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
 
     private boolean hasTestResults() {
         return build.getAction(AbstractTestResultAction.class) != null;
+    }
+
+    /**
+     * Build health weihted by the status of the latest build. Guarranteed
+     * to be over 50 if the latest build succeeded, or below 50 if the latest
+     * build failed (including test failures).
+     **/
+    private int getBuildHealth() {
+        int projectBuildStability = build.getProject().getBuildHealth().getScore();
+        boolean buildFailed = build.getResult().isWorseThan(Result.UNSTABLE);
+
+        if (buildFailed == false && hasTestResults()) {
+            if (build.getAction(AbstractTestResultAction.class).getFailCount() > 0)
+                buildFailed = true;
+        }
+
+        return (buildFailed) ? projectBuildStability / 2 : 50 + projectBuildStability / 2;
     }
 
     private String getSerieName() {
