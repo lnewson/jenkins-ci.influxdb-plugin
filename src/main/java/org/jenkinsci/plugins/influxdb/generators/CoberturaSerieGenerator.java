@@ -26,14 +26,19 @@ import java.util.concurrent.TimeUnit;
 public class CoberturaSerieGenerator extends AbstractSerieGenerator {
 
     public static final String COBERTURA_PACKAGE_COVERAGE_RATE = "cobertura_package_coverage_rate";
-    public static final String COBERTURA_CLASS_COVERAGE_RATE = "cobertura_class_coverage_rate";
-    public static final String COBERTURA_LINE_COVERAGE_RATE = "cobertura_line_coverage_rate";
-    public static final String COBERTURA_SOURCEFILE_COVERAGE_RATE = "cobertura_sourcefile_coverage_rate"; 
-    public static final String COBERTURA_BRANCH_COVERAGE_RATE = "cobertura_branch_coverage_rate";
     public static final String COBERTURA_NUMBER_OF_PACKAGES = "cobertura_number_of_packages";
-    public static final String COBERTURA_NUMBER_OF_SOURCEFILES = "cobertura_number_of_sourcefiles";
+    public static final String COBERTURA_CLASS_COVERAGE_RATE = "cobertura_class_coverage_rate";
     public static final String COBERTURA_NUMBER_OF_CLASSES = "cobertura_number_of_classes";
+    public static final String COBERTURA_LINE_COVERAGE_RATE = "cobertura_line_coverage_rate";
     public static final String COBERTURA_NUMBER_OF_LINES = "cobertura_number_of_lines";
+    public static final String COBERTURA_SOURCEFILE_COVERAGE_RATE = "cobertura_sourcefile_coverage_rate"; 
+    public static final String COBERTURA_NUMBER_OF_SOURCEFILES = "cobertura_number_of_sourcefiles";
+    public static final String COBERTURA_CONDITION_COVERAGE_RATE = "cobertura_condition_coverage_rate";
+    public static final String COBERTURA_NUMBER_OF_CONDITIONS = "cobertura_number_of_conditions";
+    public static final String COBERTURA_METHOD_COVERAGE_RATE = "cobertura_method_coverage_rate";
+    public static final String COBERTURA_NUMBER_OF_METHODS = "cobertura_number_of_methods";
+    public static final String COBERTURA_BRANCH_COVERAGE_RATE = "cobertura_branch_coverage_rate";
+
     private static final String COBERTURA_REPORT_FILE = "/target/cobertura/cobertura.ser";
 
     coberturaJenkinsPluginGenerator jenkinsGenerator = new coberturaJenkinsPluginGenerator();
@@ -89,16 +94,6 @@ public class CoberturaSerieGenerator extends AbstractSerieGenerator {
                                getCoveragePercentage(coberturaCoverageResult, CoverageMetric.PACKAGES));
             pointBuilder.field(COBERTURA_NUMBER_OF_PACKAGES,
                                getCoverageValue(coberturaCoverageResult, CoverageMetric.PACKAGES));
-            pointBuilder.field(COBERTURA_SOURCEFILE_COVERAGE_RATE,
-                               getCoveragePercentage(coberturaCoverageResult, CoverageMetric.FILES));
-            pointBuilder.field(COBERTURA_NUMBER_OF_SOURCEFILES,
-                               getCoverageValue(coberturaCoverageResult, CoverageMetric.FILES));
-
-            /**
-             * these are left out
-             * getCoveragePercentage(result, CoverageMetric.METHOD);
-             * getCoveragePercentage(result, CoverageMetric.CONDITIONAL);
-             */
 
             pointBuilder.field(COBERTURA_CLASS_COVERAGE_RATE,
                                getCoveragePercentage(coberturaCoverageResult, CoverageMetric.CLASSES));
@@ -109,6 +104,22 @@ public class CoberturaSerieGenerator extends AbstractSerieGenerator {
                                getCoveragePercentage(coberturaCoverageResult, CoverageMetric.LINE));
             pointBuilder.field(COBERTURA_NUMBER_OF_LINES,
                                getCoverageValue(coberturaCoverageResult, CoverageMetric.LINE));
+
+            pointBuilder.field(COBERTURA_SOURCEFILE_COVERAGE_RATE,
+                               getCoveragePercentage(coberturaCoverageResult, CoverageMetric.FILES));
+            pointBuilder.field(COBERTURA_NUMBER_OF_SOURCEFILES,
+                               getCoverageValue(coberturaCoverageResult, CoverageMetric.FILES));
+
+            pointBuilder.field(COBERTURA_CONDITION_COVERAGE_RATE,
+                               getCoveragePercentage(coberturaCoverageResult, CoverageMetric.CONDITIONAL));
+            pointBuilder.field(COBERTURA_NUMBER_OF_CONDITIONS,
+                               getCoverageValue(coberturaCoverageResult, CoverageMetric.CONDITIONAL));
+
+            pointBuilder.field(COBERTURA_METHOD_COVERAGE_RATE,
+                               getCoveragePercentage(coberturaCoverageResult, CoverageMetric.METHOD));
+            pointBuilder.field(COBERTURA_NUMBER_OF_METHODS,
+                               getCoverageValue(coberturaCoverageResult, CoverageMetric.METHOD));
+
         }
 
         private float getCoveragePercentage(CoverageResult result, CoverageMetric metric) {
