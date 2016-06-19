@@ -13,9 +13,9 @@ import java.util.concurrent.TimeUnit;
 
 public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
 
-    public static final String RF_FAILED = "failed";
-    public static final String RF_PASSED = "passed";
-    public static final String RF_TOTAL = "total";
+    public static final String RF_FAILED = "cases_failed";
+    public static final String RF_PASSED = "cases_passed";
+    public static final String RF_TOTAL = "cases_total";
     public static final String RF_CRITICAL_FAILED = "critical_failed";
     public static final String RF_CRITICAL_PASSED = "critical_passed";
     public static final String RF_CRITICAL_TOTAL = "critical_total";
@@ -23,7 +23,6 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
     public static final String RF_PASS_PERCENTAGE = "pass_percentage";
     public static final String RF_DURATION = "duration";
     public static final String RF_SUITES = "suites";
-    public static final String RF_TESTCASES = "testcases";
     public static final String RF_CASE_NAME = "testcase_name";
     public static final String RF_CASE_SUITE = "suite";
     public static final String RF_TAG_NAME = "tag";
@@ -201,7 +200,6 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
         addJenkinsBaseInfo(pointBuilder);
 
         pointBuilder.tag(RF_SERIE_NAME, SERIE_SUITE);
-        pointBuilder.field(RF_TESTCASES, suiteResult.getAllCases().size());
         pointBuilder.field(RF_CRITICAL_FAILED, suiteResult.getCriticalFailed());
         pointBuilder.field(RF_CRITICAL_PASSED, suiteResult.getCriticalPassed());
         pointBuilder.field(RF_CRITICAL_TOTAL, suiteResult.getCriticalTotal());
