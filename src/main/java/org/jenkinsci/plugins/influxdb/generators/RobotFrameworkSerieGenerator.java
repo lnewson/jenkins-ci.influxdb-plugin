@@ -11,27 +11,30 @@ import java.io.PrintStream;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by jrajala on 15.5.2015.
- */
 public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
 
-    public static final String RF_FAILED = "rf_failed";
-    public static final String RF_PASSED = "rf_passed";
-    public static final String RF_TOTAL = "rf_total";
-    public static final String RF_CRITICAL_FAILED = "rf_critical_failed";
-    public static final String RF_CRITICAL_PASSED = "rf_critical_passed";
-    public static final String RF_CRITICAL_TOTAL = "rf_critical_total";
-    public static final String RF_CRITICAL_PASS_PERCENTAGE = "rf_critical_pass_percentage";
-    public static final String RF_PASS_PERCENTAGE = "rf_pass_percentage";
-    public static final String RF_DURATION = "rf_duration";
-    public static final String RF_SUITES = "rf_suites";
-    public static final String RF_TESTCASES = "rf_testcases";
-    public static final String RF_CASE_NAME = "rf_case_name";
-    public static final String RF_CASE_SUITE = "rf_suite";
-    public static final String RF_TAG_NAME = "rf_tag";
-    public static final String RF_TAG_LIST = "rf_tag_list";
-    public static final String RF_SUITE_NAME = "rf_suite";
+    public static final String RF_FAILED = "failed";
+    public static final String RF_PASSED = "passed";
+    public static final String RF_TOTAL = "total";
+    public static final String RF_CRITICAL_FAILED = "critical_failed";
+    public static final String RF_CRITICAL_PASSED = "critical_passed";
+    public static final String RF_CRITICAL_TOTAL = "critical_total";
+    public static final String RF_CRITICAL_PASS_PERCENTAGE = "critical_pass_percentage";
+    public static final String RF_PASS_PERCENTAGE = "pass_percentage";
+    public static final String RF_DURATION = "duration";
+    public static final String RF_SUITES = "suites";
+    public static final String RF_TESTCASES = "testcases";
+    public static final String RF_CASE_NAME = "testcase_name";
+    public static final String RF_CASE_SUITE = "suite";
+    public static final String RF_TAG_NAME = "tag";
+    public static final String RF_TAG_LIST = "tag_list";
+    public static final String RF_SUITE_NAME = "suite";
+    public static final String RF_SERIE_NAME = "serie";
+
+    public static final String SERIE_SUMMARY = "summary";
+    public static final String SERIE_TAG = "tag";
+    public static final String SERIE_SUITE = "suite";
+    public static final String SERIE_TESTCASE = "testcase";
 
     private final Map<String, RobotTagResult> tagResults;
 
@@ -41,7 +44,9 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
     }
 
     public boolean hasReport() {
+        logger.println("Influxdb Robot Framework report hasReport()");
         RobotBuildAction robotBuildAction = build.getAction(RobotBuildAction.class);
+        logger.println("Influxdb Robot Framework report hasReport(), robotBuildAction:" + robotBuildAction);
         return robotBuildAction != null && robotBuildAction.getResult() != null;
     }
 
@@ -61,19 +66,20 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
     }
 
     private Point generateOverviewSerie(RobotBuildAction robotBuildAction) {
-        Point.Builder pointBuilder = Point.measurement(getSeriePrefix())
+        Point.Builder pointBuilder = Point.measurement(getSerieName())
             .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS);
 
         addJenkinsBaseInfo(pointBuilder);
 
+        pointBuilder.tag(RF_SERIE_NAME, SERIE_SUMMARY);
         pointBuilder.field(RF_FAILED, robotBuildAction.getResult().getOverallFailed());
         pointBuilder.field(RF_PASSED, robotBuildAction.getResult().getOverallPassed());
         pointBuilder.field(RF_TOTAL, robotBuildAction.getResult().getOverallTotal());
+        pointBuilder.field(RF_PASS_PERCENTAGE, robotBuildAction.getOverallPassPercentage());
         pointBuilder.field(RF_CRITICAL_FAILED, robotBuildAction.getResult().getCriticalFailed());
         pointBuilder.field(RF_CRITICAL_PASSED, robotBuildAction.getResult().getCriticalPassed());
         pointBuilder.field(RF_CRITICAL_TOTAL, robotBuildAction.getResult().getCriticalTotal());
         pointBuilder.field(RF_CRITICAL_PASS_PERCENTAGE, robotBuildAction.getCriticalPassPercentage());
-        pointBuilder.field(RF_PASS_PERCENTAGE, robotBuildAction.getOverallPassPercentage());
         pointBuilder.field(RF_DURATION, robotBuildAction.getResult().getDuration());
         pointBuilder.field(RF_SUITES, robotBuildAction.getResult().getAllSuites().size());
 
@@ -98,15 +104,22 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
     }
 
     private Point generateCaseSerie(RobotCaseResult caseResult) {
-        Point.Builder pointBuilder = Point.measurement(getCaseSerieName(caseResult))
+        Point.Builder pointBuilder = Point.measurement(getSerieName())
             .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS);
 
         addJenkinsBaseInfo(pointBuilder);
 
+        pointBuilder.tag(RF_SERIE_NAME, SERIE_TESTCASE);
         pointBuilder.field(RF_CRITICAL_FAILED, caseResult.getCriticalFailed());
         pointBuilder.field(RF_CRITICAL_PASSED, caseResult.getCriticalPassed());
+        pointBuilder.field(RF_CRITICAL_TOTAL, caseResult.getCriticalFailed() + caseResult.getCriticalPassed());
+        pointBuilder.field(RF_CRITICAL_PASS_PERCENTAGE,
+                           calcPassPercentage(caseResult.getCriticalFailed(), caseResult.getCriticalPassed()));
         pointBuilder.field(RF_FAILED, caseResult.getFailed());
         pointBuilder.field(RF_PASSED, caseResult.getPassed());
+        pointBuilder.field(RF_TOTAL, caseResult.getFailed() + caseResult.getPassed());
+        pointBuilder.field(RF_PASS_PERCENTAGE,
+                           calcPassPercentage(caseResult.getFailed(), caseResult.getPassed()));
         pointBuilder.field(RF_DURATION, caseResult.getDuration());
 
         // build comicolon separated tag list
@@ -159,17 +172,22 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
 
     private Point generateTagSerie(RobotTagResult tagResult) {
 
-        Point.Builder pointBuilder = Point.measurement(getTagSerieName(tagResult))
+        Point.Builder pointBuilder = Point.measurement(getSerieName())
             .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS);
 
         addJenkinsBaseInfo(pointBuilder);
 
+        pointBuilder.tag(RF_SERIE_NAME, SERIE_TAG);
         pointBuilder.field(RF_CRITICAL_FAILED, tagResult.criticalFailed);
         pointBuilder.field(RF_CRITICAL_PASSED, tagResult.criticalPassed);
         pointBuilder.field(RF_CRITICAL_TOTAL, tagResult.criticalPassed + tagResult.criticalFailed);
+        pointBuilder.field(RF_CRITICAL_PASS_PERCENTAGE,
+                           calcPassPercentage(tagResult.criticalFailed, tagResult.criticalPassed));
         pointBuilder.field(RF_FAILED, tagResult.failed);
         pointBuilder.field(RF_PASSED, tagResult.passed);
         pointBuilder.field(RF_TOTAL, tagResult.passed + tagResult.failed);
+        pointBuilder.field(RF_PASS_PERCENTAGE,
+                           calcPassPercentage(tagResult.failed, tagResult.passed));
         pointBuilder.field(RF_DURATION, tagResult.duration);
         pointBuilder.tag(RF_TAG_NAME, tagResult.name);
 
@@ -177,24 +195,32 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
     }
 
     private Point generateSuiteSerie(RobotSuiteResult suiteResult) {
-        Point.Builder pointBuilder = Point.measurement(getSuiteSeriePrefix())
+        Point.Builder pointBuilder = Point.measurement(getSerieName())
             .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS);
 
         addJenkinsBaseInfo(pointBuilder);
 
+        pointBuilder.tag(RF_SERIE_NAME, SERIE_SUITE);
         pointBuilder.field(RF_TESTCASES, suiteResult.getAllCases().size());
         pointBuilder.field(RF_CRITICAL_FAILED, suiteResult.getCriticalFailed());
         pointBuilder.field(RF_CRITICAL_PASSED, suiteResult.getCriticalPassed());
         pointBuilder.field(RF_CRITICAL_TOTAL, suiteResult.getCriticalTotal());
+        pointBuilder.field(RF_CRITICAL_PASS_PERCENTAGE,
+                           calcPassPercentage(suiteResult.getCriticalFailed(), suiteResult.getCriticalPassed()));
         pointBuilder.field(RF_FAILED, suiteResult.getFailed());
         pointBuilder.field(RF_PASSED, suiteResult.getPassed());
         pointBuilder.field(RF_TOTAL, suiteResult.getTotal());
+        pointBuilder.field(RF_PASS_PERCENTAGE,
+                           calcPassPercentage(suiteResult.getFailed(), suiteResult.getPassed()));
         pointBuilder.field(RF_DURATION, suiteResult.getDuration());
         pointBuilder.tag(RF_SUITE_NAME, suiteResult.getName());
 
         return pointBuilder.build();
     }
 
+    private String getSerieName() {
+        return "robotframework";
+    }
 
     private String getTagSerieName(RobotTagResult tagResult) {
         return getTagSeriePrefix();
@@ -218,5 +244,14 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
 
     private String getSeriePrefix() {
         return build.getProject().getName()+".rf";
+    }
+
+    private float calcPassPercentage(long failed, long passed) {
+        long total = failed + passed;
+
+        if (total == 0)
+            return 100.0f;
+        else
+            return (100f * (float) passed) / ((float) total);
     }
 }

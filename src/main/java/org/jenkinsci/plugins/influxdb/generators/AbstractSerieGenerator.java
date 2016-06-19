@@ -8,9 +8,6 @@ import java.util.List;
 import java.io.PrintStream;
 
 
-/**
- * Created by jrajala on 15.5.2015.
- */
 public abstract class AbstractSerieGenerator implements SerieGenerator {
 
     public static final String PROJECT_NAME = "project_name";
@@ -25,7 +22,7 @@ public abstract class AbstractSerieGenerator implements SerieGenerator {
     }
 
     protected void addJenkinsBaseInfo(Point.Builder pointBuilder) {
-        pointBuilder.field(PROJECT_NAME, build.getProject().getName());
+        pointBuilder.tag(PROJECT_NAME, build.getProject().getName());
         pointBuilder.field(BUILD_NUMBER, build.getNumber());
     }
 }

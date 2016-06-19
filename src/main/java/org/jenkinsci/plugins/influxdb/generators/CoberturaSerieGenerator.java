@@ -19,9 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by jrajala on 15.5.2015.
- */
 
 public class CoberturaSerieGenerator extends AbstractSerieGenerator {
 
@@ -194,6 +191,6 @@ public class CoberturaSerieGenerator extends AbstractSerieGenerator {
     }
 
     private String getSerieName() {
-        return build.getProject().getName()+".cobertura";
+        return "cobertura";
     }
 }

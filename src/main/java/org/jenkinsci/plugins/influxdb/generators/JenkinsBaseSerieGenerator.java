@@ -11,9 +11,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.io.PrintStream;
 
-/**
- * Created by jrajala on 15.5.2015.
- */
+
 public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
 
     public static final String BUILD_DURATION = "build_duration";
@@ -86,6 +84,6 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
     }
 
     private String getSerieName() {
-        return build.getProject().getName()+".jenkins";
+        return "jenkins";
     }
 }
