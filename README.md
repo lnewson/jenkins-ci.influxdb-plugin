@@ -58,7 +58,7 @@ Requires Jenkins Robot Framework plugin. Generates several InfluxDB series.
    - suite - per __suite__
    - testcase - per __testcase__
 
-###Summary data (*project_name*.rf)
+Supported metrics:
    - project_name
    - build_number
    - duration
