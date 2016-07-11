@@ -1,15 +1,19 @@
 # InfluxDB Jenkins Plugin
 
-This plugin allows you to send the build metrics to InfluxDB time series database, to be used for analysis and in radiators. Codebase is forked from Jenkings Graphite Plugin and refactored to suit purpose.
+This plugin allows you to send the build metrics to [InfluxDB](https://influxdata.com/) time series database, to be used for analysis and in radiators. One option is to use Grafana (http://grafana.org) for visualizing the data. 
 
-Has been tested with InfluxDB version v0.11 and v0.12. Does not support InfluxDB versions prior v0.9.
+Codebase is forked from Jenkings Graphite Plugin and refactored to suit purpose.
+
+Plugin has been tested with InfluxDB version v0.11, v0.12 and v0.13. Does not support InfluxDB versions prior v0.9.
 
 Supported metrics:
    - Jenkins base report
    - Cobertura code coverage metrics
    - Robot Framework plugin metrics
 
-## Jenkins base report (*project_name*.jenkins)
+## Jenkins base report (InfluxDB measurement __jenkins__)
+
+Generates InfluxDB serie per project (project_name)
 
 Supported metrics:
    - project_name
@@ -26,9 +30,11 @@ Supported metrics:
    - tests_skipped
    - tests_total
 
-## Cobertura code coverage metrics (*project_name*.cobertura)
+## Cobertura code coverage metrics (InfluxDB measurement __cobertura__)
 
-Requires Jenkins Cobertura plugin. Supported metrics:
+Requires Jenkins Cobertura plugin. Generates InfluxDB serie per project (project_name).
+
+Supported metrics:
    - project_name
    - build_number
    - cobertura_package_coverage_rate
@@ -44,66 +50,32 @@ Requires Jenkins Cobertura plugin. Supported metrics:
    - cobertura_method_coverage_rate
    - cobertura_number_of_methods
 
-## Robot Framework plugin metrics
+## Robot Framework plugin metrics (InfluxDB measurement __robotframework__)
 
-Requires Jenkins Robot Framework plugin. Generates four different measurements. 
+Requires Jenkins Robot Framework plugin. Generates several InfluxDB series. 
+   - summary - per project (__project_name__)
+   - tag - per __tag__
+   - suite - per __suite__
+   - testcase - per __testcase__
 
 ###Summary data (*project_name*.rf)
    - project_name
    - build_number
-   - rf_duration
-   - rf_passed
-   - rf_failed
-   - rf_total
-   - rf_pass_percentage
-   - rf_critical_passed
-   - rf_critical_failed
-   - rf_critical_total
-   - rf_critical_pass_percentage
-   - rf_suites
-
-###Tag (*project_name*.rf.tag)
-
-Per each tag
-   - project_name
-   - build_number
-   - rf_tag
-   - rf_duration
-   - rf_passed
-   - rf_failed
-   - rf_total
-   - rf_critical_passed
-   - rf_critical_failed
-   - rf_critical_total
-
-###Suite (*project_name*.rf.suite)
-
-Per each test suite
-   - project_name
-   - build_number
-   - rf_suite
-   - rf_duration
-   - rf_passed
-   - rf_failed
-   - rf_total
-   - rf_testcases
-   - rf_critical_passed
-   - rf_critical_failed
-   - rf_critical_total
-
-###Testcase (*project_name*.rf.testcase)
-
-Per each test case
-   - project_name
-   - build_number
-   - rf_case_name
-   - rf_duration
-   - rf_passed
-   - rf_failed
-   - rf_critical_passed
-   - rf_critical_failed
-   - rf_suite
-   - rf_tag_list
+   - duration
+   - cases_failed
+   - cases_passed
+   - cases_total
+   - pass_percentage
+   - critical_failed
+   - critical_passed
+   - critical_total
+   - critical_pass_percentage
+   - serie
+   - suite
+   - suites
+   - tag
+   - tag_list
+   - testcase_name
 
 ##Future plans:
    - Getting plugin into Jenkins distribution
