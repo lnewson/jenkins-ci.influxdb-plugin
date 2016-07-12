@@ -48,8 +48,16 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
         pointBuilder.field(BUILD_STATUS_MESSAGE, build.getBuildStatusSummary().message);
         pointBuilder.field(PROJECT_BUILD_STABILITY, build.getProject().getBuildHealth().getScore());
         pointBuilder.field(PROJECT_BUILD_HEALTH, getBuildHealth());
-        pointBuilder.field(PROJECT_LAST_SUCCESSFUL, build.getProject().getLastSuccessfulBuild().getNumber());
-        pointBuilder.field(PROJECT_LAST_STABLE, build.getProject().getLastStableBuild().getNumber());
+
+        if (build.getProject().getLastSuccessfulBuild() != null)
+            pointBuilder.field(PROJECT_LAST_SUCCESSFUL, build.getProject().getLastSuccessfulBuild().getNumber());
+        else
+            pointBuilder.field(PROJECT_LAST_SUCCESSFUL, 0);
+
+        if (build.getProject().getLastStableBuild() != null)
+            pointBuilder.field(PROJECT_LAST_STABLE, build.getProject().getLastStableBuild().getNumber());
+        else
+            pointBuilder.field(PROJECT_LAST_STABLE, 0);
 
         if(hasTestResults()) {
             pointBuilder.field(TESTS_TOTAL, build.getAction(AbstractTestResultAction.class).getTotalCount());
