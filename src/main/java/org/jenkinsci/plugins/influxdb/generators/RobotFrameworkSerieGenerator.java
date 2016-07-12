@@ -43,9 +43,7 @@ public class RobotFrameworkSerieGenerator extends AbstractSerieGenerator {
     }
 
     public boolean hasReport() {
-        logger.println("Influxdb Robot Framework report hasReport()");
         RobotBuildAction robotBuildAction = build.getAction(RobotBuildAction.class);
-        logger.println("Influxdb Robot Framework report hasReport(), robotBuildAction:" + robotBuildAction);
         return robotBuildAction != null && robotBuildAction.getResult() != null;
     }
 
