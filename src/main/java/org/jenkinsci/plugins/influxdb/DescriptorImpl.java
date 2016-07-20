@@ -96,13 +96,13 @@ public final class DescriptorImpl extends BuildStepDescriptor<Publisher> impleme
 	}
 
 	public InfluxDbValidator getValidator() {
-	return validator;
-}
+        return validator;
+    }
 
 
 	public void setValidator(InfluxDbValidator validator) {
-	this.validator = validator;
-}
+        this.validator = validator;
+    }
 
 	/**
 	 * @param value
