@@ -38,7 +38,7 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
         Point.Builder pointBuilder = Point.measurement(getSerieName())
             .time(build.getTimeInMillis(), TimeUnit.MILLISECONDS);
 
-        logger.println("Influxdb starting to generate basic report");
+        logger.println("Influxdb starting to generate jenkins report");
 
         addJenkinsBaseInfo(pointBuilder);
 
@@ -65,9 +65,11 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
             pointBuilder.field(TESTS_SKIPPED, build.getAction(AbstractTestResultAction.class).getSkipCount());
         }
 
-        logger.println("Influxdb basic report generation finished");
+        Point point = pointBuilder.build();
+        //logger.println("Influxdb jenkins report data:" + point);
+        logger.println("Influxdb jenkins report generation finished"); 
 
-        return new Point[]{pointBuilder.build()};
+        return new Point[]{point};
     }
 
     private boolean hasTestResults() {
@@ -75,7 +77,7 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
     }
 
     /**
-     * Build health weihted by the status of the latest build. Guarranteed
+     * Build health weighted by the status of the latest build. Guarranteed
      * to be over 50 if the latest build succeeded, or below 50 if the latest
      * build failed (including test failures).
      **/
