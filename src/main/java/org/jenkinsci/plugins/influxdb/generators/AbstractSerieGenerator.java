@@ -1,11 +1,14 @@
 package org.jenkinsci.plugins.influxdb.generators;
 
 import hudson.model.AbstractBuild;
+import hudson.matrix.MatrixBuild;
+import hudson.matrix.MatrixRun;
 import org.influxdb.dto.Point;
 
 import java.util.HashMap;
 import java.util.List;
 import java.io.PrintStream;
+import java.util.Map;
 
 
 public abstract class AbstractSerieGenerator implements SerieGenerator {
@@ -22,7 +25,21 @@ public abstract class AbstractSerieGenerator implements SerieGenerator {
     }
 
     protected void addJenkinsBaseInfo(Point.Builder pointBuilder) {
-        pointBuilder.tag(PROJECT_NAME, build.getProject().getName());
+        if (build.getProject() instanceof hudson.matrix.MatrixConfiguration)
+        {
+            // make child project name the same as the parent project name
+            pointBuilder.tag(PROJECT_NAME, build.getProject().getParent().getDisplayName());
+
+            // Create a tag for each matrix axis, prefixed with "matrix_"
+            Map<String,String> matrixVariables = build.getBuildVariables();
+            for (Map.Entry<String, String> variable : matrixVariables.entrySet()) {
+                pointBuilder.tag("matrix_" + variable.getKey(), variable.getValue());
+            }
+        }
+        else {
+            pointBuilder.tag(PROJECT_NAME, build.getProject().getName());
+        }
+
         pointBuilder.field(BUILD_NUMBER, build.getNumber());
     }
 }

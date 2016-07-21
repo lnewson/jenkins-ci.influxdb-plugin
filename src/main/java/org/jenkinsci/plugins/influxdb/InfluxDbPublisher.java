@@ -11,6 +11,11 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+import hudson.matrix.MatrixAggregatable;
+import hudson.matrix.MatrixAggregator;
+import hudson.matrix.MatrixBuild;
+import hudson.matrix.MatrixProject;
+import hudson.matrix.MatrixRun;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 import org.jenkinsci.plugins.influxdb.generators.CoberturaSerieGenerator;
@@ -30,7 +35,7 @@ import java.util.concurrent.TimeUnit;
  * @author joachimrodrigues
  *
  */
-public class InfluxDbPublisher extends Notifier {
+public class InfluxDbPublisher extends Notifier implements MatrixAggregatable {
 
 
     @Extension
@@ -74,6 +79,27 @@ public class InfluxDbPublisher extends Notifier {
         }
         return null;
     }
+
+    @Override
+    public MatrixAggregator createAggregator(MatrixBuild build, Launcher launcher, BuildListener listener) {
+        return new MatrixAggregator(build, launcher, listener) {
+
+            @Override
+            public boolean endRun(MatrixRun run) throws InterruptedException, IOException {
+                PrintStream logger = listener.getLogger();
+
+                return publishResults(run, listener);
+            }
+
+            @Override
+            public boolean endBuild() throws InterruptedException, IOException {
+                PrintStream logger = listener.getLogger();
+
+                return publishResults(build, listener);
+            }
+        };
+    }
+
 
     /*
      * (non-Javadoc)
@@ -127,10 +153,18 @@ public class InfluxDbPublisher extends Notifier {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         PrintStream logger = listener.getLogger();
+
+        return publishResults(build, listener);
+    }
+
+    private boolean publishResults(AbstractBuild<?, ?> build, BuildListener listener) throws InterruptedException, IOException {
+        PrintStream logger = listener.getLogger();
         Server server = getServer();
         InfluxDB influxDB = openInfluxDb(server);
 
         logger.println("Influxdb publisher started");
+        logger.println("project name:" + build.getProject().getName());
+        logger.println("parent project:" + build.getProject().getParent().getDisplayName());
 
         JenkinsBaseSerieGenerator jGenerator = new JenkinsBaseSerieGenerator(build, logger);
         BatchPoints jenkinsBatchPoints = BatchPoints.database(server.getDatabaseName())

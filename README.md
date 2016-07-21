@@ -1,8 +1,8 @@
 # InfluxDB Jenkins Plugin
 
-This plugin allows you to send the build metrics to [InfluxDB](https://influxdata.com/) time series database, to be used for analysis and in radiators. One option is to use Grafana (http://grafana.org) for visualizing the data. 
+This plugin allows sending build metrics to [InfluxDB](https://influxdata.com/) time series database, to be used for analysis and with status radiators. Recommeded option is to use Grafana (http://grafana.org) for visualizing the data.
 
-Codebase is forked from Jenkings Graphite Plugin and refactored to suit purpose.
+Codebase is forked from Jenkins Graphite Plugin and refactored to suit purpose.
 
 Plugin has been tested with InfluxDB version v0.11, v0.12 and v0.13. Does not support InfluxDB versions prior v0.9.
 
@@ -76,6 +76,10 @@ Supported metrics:
    - tag
    - tag_list
    - testcase_name
+
+## Support for Jenkins Multi Configuration projects
+
+Plugin also supports [Jenkins Matrix plugin](https://wiki.jenkins-ci.org/display/JENKINS/Matrix+Project+Plugin). Matrix axis are stored as InfluxDB tags with *matrix_* prefix, so that each matrix combination forms its' own serie. In addition, top level _jenkins_ report is created with empty values for matrix tags.
 
 ##Future plans:
    - Getting plugin into Jenkins distribution
