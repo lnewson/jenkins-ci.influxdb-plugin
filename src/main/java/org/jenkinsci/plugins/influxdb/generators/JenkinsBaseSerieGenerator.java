@@ -1,15 +1,13 @@
 package org.jenkinsci.plugins.influxdb.generators;
 
-import hudson.model.Result;
 import hudson.model.AbstractBuild;
+import hudson.model.Executor;
+import hudson.model.Result;
 import hudson.tasks.test.AbstractTestResultAction;
 import org.influxdb.dto.Point;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.io.PrintStream;
+import java.util.concurrent.TimeUnit;
 
 
 public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
@@ -25,6 +23,7 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
     public static final String TESTS_FAILED = "tests_failed";
     public static final String TESTS_SKIPPED = "tests_skipped";
     public static final String TESTS_TOTAL = "tests_total";
+    public static final String QUEUE_DURATION = "queue_duration";
 
     public JenkinsBaseSerieGenerator(AbstractBuild<?, ?> build, PrintStream logger) {
         super(build, logger);
@@ -58,6 +57,11 @@ public class JenkinsBaseSerieGenerator extends AbstractSerieGenerator {
             pointBuilder.field(PROJECT_LAST_STABLE, build.getProject().getLastStableBuild().getNumber());
         else
             pointBuilder.field(PROJECT_LAST_STABLE, 0);
+
+        Executor executor = build.getExecutor();
+        if (executor != null) {
+            pointBuilder.field(QUEUE_DURATION, executor.getTimeSpentInQueue());
+        }
 
         if(hasTestResults()) {
             pointBuilder.field(TESTS_TOTAL, build.getAction(AbstractTestResultAction.class).getTotalCount());
