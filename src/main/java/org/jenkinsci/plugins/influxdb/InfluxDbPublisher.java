@@ -1,23 +1,21 @@
 package org.jenkinsci.plugins.influxdb;
 
-import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
-
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.matrix.MatrixAggregatable;
+import hudson.matrix.MatrixAggregator;
+import hudson.matrix.MatrixBuild;
+import hudson.matrix.MatrixRun;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
-import hudson.matrix.MatrixAggregatable;
-import hudson.matrix.MatrixAggregator;
-import hudson.matrix.MatrixBuild;
-import hudson.matrix.MatrixProject;
-import hudson.matrix.MatrixRun;
+import jenkins.model.Jenkins;
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
-import org.influxdb.dto.Point;
 import org.jenkinsci.plugins.influxdb.generators.CoberturaSerieGenerator;
 import org.jenkinsci.plugins.influxdb.generators.JenkinsBaseSerieGenerator;
 import org.jenkinsci.plugins.influxdb.generators.RobotFrameworkSerieGenerator;
@@ -25,8 +23,6 @@ import org.jenkinsci.plugins.influxdb.generators.SerieGenerator;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -157,6 +153,10 @@ public class InfluxDbPublisher extends Notifier implements MatrixAggregatable {
         return publishResults(build, listener);
     }
 
+    private boolean isPluginAvailable(String pluginName) {
+        return Jenkins.getInstance().getPlugin(pluginName) != null;
+    }
+
     private boolean publishResults(AbstractBuild<?, ?> build, BuildListener listener) throws InterruptedException, IOException {
         PrintStream logger = listener.getLogger();
         Server server = getServer();
@@ -172,23 +172,27 @@ public class InfluxDbPublisher extends Notifier implements MatrixAggregatable {
                 .points(jGenerator.generate()).build();
         influxDB.write(jenkinsBatchPoints);
 
-        CoberturaSerieGenerator cbGenerator = new CoberturaSerieGenerator(build, logger);
-        if(cbGenerator.hasReport()) {
-            BatchPoints coberturaPoints = BatchPoints
-                    .database(server.getDatabaseName())
-                    .retentionPolicy("default")
-                    .points(cbGenerator.generate()).build();
-            influxDB.write(coberturaPoints);
+        if (isPluginAvailable("cobertura")) {
+            CoberturaSerieGenerator cbGenerator = new CoberturaSerieGenerator(build, logger);
+            if (cbGenerator.hasReport()) {
+                BatchPoints coberturaPoints = BatchPoints
+                        .database(server.getDatabaseName())
+                        .retentionPolicy("default")
+                        .points(cbGenerator.generate()).build();
+                influxDB.write(coberturaPoints);
+            }
         }
 
-        SerieGenerator rfGenerator = new RobotFrameworkSerieGenerator(build, logger);
-        if(rfGenerator.hasReport()) {
-            BatchPoints robotFrameworkPoints = BatchPoints
-                    .database(server.getDatabaseName())
-                    .retentionPolicy("default")
-                    .points(rfGenerator.generate())
-                    .build();
-            influxDB.write(robotFrameworkPoints);
+        if (isPluginAvailable("robot")) {
+            SerieGenerator rfGenerator = new RobotFrameworkSerieGenerator(build, logger);
+            if (rfGenerator.hasReport()) {
+                BatchPoints robotFrameworkPoints = BatchPoints
+                        .database(server.getDatabaseName())
+                        .retentionPolicy("default")
+                        .points(rfGenerator.generate())
+                        .build();
+                influxDB.write(robotFrameworkPoints);
+            }
         }
 
         logger.println("Influxdb publisher finished");
